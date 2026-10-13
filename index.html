@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#020617">
+    <title>Pages & Pomodoros - Native</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Caveat:wght@700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], stylish: ['Caveat', 'cursive'], phase: ['Oswald', 'sans-serif'] },
+                    colors: { tomato: '#ff4757', dark: '#0b0e14', accent: '#3b82f6' },
+                    animation: {
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 4s ease-in-out infinite',
+                        'glow': 'glow 3s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        'float': { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-8px)' } },
+                        'glow': { '0%': { filter: 'drop-shadow(0 0 10px rgba(255, 71, 87, 0.3))' }, '100%': { filter: 'drop-shadow(0 0 25px rgba(255, 71, 87, 0.8))' } }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        html, body {
+            margin: 0; padding: 0; width: 100%; height: 100dvh;
+            background-color: #020617; color: #f8fafc;
+            overflow: hidden; -webkit-font-smoothing: antialiased; touch-action: manipulation;
+        }
+
+        .native-scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+        .native-scroll::-webkit-scrollbar { display: none; }
+        .no-scroll { overflow: hidden; }
+
+        .app-page { display: none; opacity: 0; transition: opacity 0.3s ease; }
+        .app-page.active-page { display: flex; opacity: 1; }
+
+        .bottom-nav { background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,0.05); }
+        .nav-item { color: #64748b; transition: all 0.2s; }
+        .nav-item.active { color: #3b82f6; transform: translateY(-2px); }
+        .nav-item.active .nav-indicator { opacity: 1; transform: scale(1); }
+
+        #time-display { text-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 40px rgba(59, 130, 246, 0.2); transition: color 0.5s ease, text-shadow 0.5s ease; }
+        .overtime-glow { text-shadow: 0 0 40px rgba(239, 68, 68, 0.5) !important; color: #ef4444 !important; }
+
+        /* OLED Battery Saver Dim Mode */
+        body.dim-mode { background: #000000 !important; }
+        body.dim-mode * { box-shadow: none !important; text-shadow: none !important; border-color: transparent !important; }
+        body.dim-mode #page-timer { background: #000000 !important; }
+        body.dim-mode #timer-container { background: transparent !important; border: none !important; box-shadow: none !important; backdrop-filter: none !important; padding: 0 !important; margin-top: auto; margin-bottom: auto; }
+        body.dim-mode .bottom-nav { display: none !important; }
+        body.dim-mode #controls-container, 
+        body.dim-mode #ai-coach-card, 
+        body.dim-mode h1, 
+        body.dim-mode #current-phase-display { display: none !important; }
+        body.dim-mode #timer-wrapper { margin: auto !important; transform: scale(1.1); transition: transform 0.5s ease; pointer-events: none; }
+        body.dim-mode #time-display { color: #1e293b !important; font-weight: normal; font-size: 6rem !important; drop-shadow: none !important; } 
+        body.dim-mode #session-type { color: #0f172a !important; }
+        body.dim-mode .animate-pulse-slow, 
+        body.dim-mode .animate-float, 
+        body.dim-mode .animate-glow, 
+        body.dim-mode .animate-droplet { animation: none !important; filter: none !important; transform: none !important; }
+        
+        /* Make Dim button slightly visible but very subtle */
+        body.dim-mode #dim-btn { opacity: 0.3 !important; background: rgba(30, 41, 59, 0.3) !important; border: 1px solid rgba(51, 65, 85, 0.3) !important; color: #64748b !important; top: 1rem !important; left: 1rem !important; }
+        body.dim-mode #dim-btn:hover { opacity: 0.8 !important; }
+    </style>
+</head>
+
+<body class="flex flex-col">
+
+    <div class="flex-1 relative w-full h-full overflow-hidden">
+        
+        <!-- Timer Page -->
+        <div id="page-timer" class="app-page active-page absolute inset-0 flex-col items-center justify-center p-4 native-scroll pb-24 bg-gradient-to-b from-[#0a0f1d] to-[#020617]">
+            <div id="timer-container" class="w-full max-w-lg flex flex-col items-center relative h-full">
+                
+                <!-- Dim Mode Button -->
+                <button id="dim-btn" class="absolute top-0 left-0 text-slate-500 hover:text-white bg-slate-800/50 p-3 rounded-full border border-slate-700/50 z-50 active:scale-95 transition-all" title="Toggle OLED Dim Mode">
+                    🌙
+                </button>
+
+                <div class="text-center mb-6 w-full flex flex-col items-center justify-center mt-8">
+                    <h1 class="text-4xl sm:text-5xl font-stylish tracking-wide text-blue-400 drop-shadow-[0_0_15px_rgba(59,130,246,0.6)] m-0 flex items-center justify-center gap-2">Pages & Pomodoros</h1>
+                    <div id="current-phase-display" class="mt-3 bg-blue-500/10 px-6 py-1.5 rounded-full text-xs font-bold text-blue-400 border border-blue-500/20 uppercase tracking-widest font-phase shadow-inner">Ready to Start</div>
+                </div>
+
+                <div id="timer-wrapper" class="relative w-full mb-8 flex flex-col items-center justify-center flex-1">
+                    <div id="animation-container" class="min-h-[5rem] mb-2 flex items-center justify-center overflow-visible p-4 pointer-events-none">
+                        <div id="anim-study" class="hidden text-tomato animate-float"><svg class="w-16 h-16 animate-glow overflow-visible" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.866 8.21 8.21 0 003 2.48z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 18a3.75 3.75 0 00.495-7.467 5.99 5.99 0 00-1.925 3.546 5.974 5.974 0 01-2.133-1A3.75 3.75 0 0012 18z"></path></svg></div>
+                        <div id="anim-break" class="hidden text-blue-400 animate-float"><svg class="w-16 h-16 animate-glow overflow-visible" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v10a4 4 0 004 4h8a4 4 0 004-4V4H4z M10 4v6m4-6v6"></path></svg></div>
+                    </div>
+                    <span id="time-display" class="text-[25vw] sm:text-[8rem] leading-[0.85] font-extrabold font-sans tracking-tighter text-white tabular-nums">00:00</span>
+                    <span id="session-type" class="text-sm font-medium text-slate-400 mt-4 uppercase tracking-[0.2em] text-center transition-colors">Select Session</span>
+                </div>
+
+                <div id="controls-container" class="flex justify-center items-center gap-4 w-full mb-8">
+                    <button id="undo-btn" class="bg-slate-800 text-slate-300 p-4 rounded-full disabled:opacity-30 active:scale-95 transition-all"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg></button>
+                    <button id="start-btn" class="bg-blue-600 text-white font-bold p-6 rounded-full active:scale-95 shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-all flex items-center justify-center"><svg class="w-8 h-8 ml-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg></button>
+                    <button id="pause-btn" class="hidden bg-slate-800 text-blue-400 font-bold p-6 rounded-full active:scale-95 border border-slate-700 transition-all flex items-center justify-center"><svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg></button>
+                    <button id="complete-main-btn" class="hidden bg-emerald-600 text-white font-bold p-5 rounded-full active:scale-95 shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all flex items-center justify-center"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></button>
+                    <button id="skip-btn" class="bg-slate-800 text-slate-300 p-4 rounded-full disabled:opacity-30 active:scale-95 transition-all"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414l2-2a1 1 0 000-1.414l-2-2z" clip-rule="evenodd"></path></svg></button>
+                </div>
+
+                <div id="ai-coach-card" class="w-full bg-slate-800/50 border border-slate-700 p-4 rounded-2xl shadow-inner mt-auto">
+                    <h3 id="guide-box-title" class="text-[10px] uppercase font-bold tracking-widest text-slate-400 mb-2 flex items-center gap-2">🤖 AI Coach Standby</h3>
+                    <p id="deep-guide-text" class="text-sm text-slate-200 font-medium italic">Waiting for protocol to begin...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Schedule Page -->
+        <div id="page-schedule" class="app-page absolute inset-0 flex-col items-center p-4 native-scroll pb-24 bg-[#020617]">
+            <div class="w-full max-w-2xl flex flex-col h-full">
+                
+                <h2 class="text-lg font-bold text-white mb-3 border-b border-slate-800 pb-2 flex justify-between items-center shrink-0">
+                    <span>Live Protocol</span>
+                    <span id="session-count-badge" class="text-[10px] font-bold text-slate-400 bg-slate-800 px-2 py-1 rounded-md uppercase tracking-wider">0 Remaining</span>
+                </h2>
+                
+                <div id="schedule-container" class="flex flex-col gap-2 mb-6 shrink-0"></div>
+                
+                <div class="mt-4 bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col shrink-0">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-xs font-bold text-white uppercase tracking-wider">🗓️ Build Daily Template</h3>
+                    </div>
+                    
+                    <div class="flex gap-1 overflow-x-auto no-scrollbar mb-3 w-full pb-1" id="template-day-tabs">
+                        <button type="button" class="day-tab-btn flex-1 min-w-[40px] bg-slate-800 text-slate-300 text-[10px] px-2 py-2 rounded-lg font-bold" data-day="1">Mon</button>
+                        <button type="button" class="day-tab-btn flex-1 min-w-[40px] bg-slate-800 text-slate-300 text-[10px] px-2 py-2 rounded-lg font-bold" data-day="2">Tue</button>
+                        <button type="button" class="day-tab-btn flex-1 min-w-[40px] bg-slate-800 text-slate-300 text-[10px] px-2 py-2 rounded-lg font-bold" data-day="3">Wed</button>
+                        <button type="button" class="day-tab-btn flex-1 min-w-[40px] bg-slate-800 text-slate-300 text-[10px] px-2 py-2 rounded-lg font-bold" data-day="4">Thu</button>
+                        <button type="button" class="day-tab-btn flex-1 min-w-[40px] bg-slate-800 text-slate-300 text-[10px] px-2 py-2 rounded-lg font-bold" data-day="5">Fri</button>
+                        <button type="button" class="day-tab-btn flex-1 min-w-[40px] bg-slate-800 text-slate-300 text-[10px] px-2 py-2 rounded-lg font-bold" data-day="6">Sat</button>
+                        <button type="button" class="day-tab-btn flex-1 min-w-[40px] bg-slate-800 text-slate-300 text-[10px] px-2 py-2 rounded-lg font-bold" data-day="0">Sun</button>
+                    </div>
+
+                    <div class="flex flex-col gap-2 mb-4 p-3 bg-slate-950 border border-slate-800 rounded-xl">
+                        <input type="text" id="new-sess-title" placeholder="Session Title (e.g. Physics)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none">
+                        <div class="flex gap-2">
+                            <input type="number" id="new-sess-dur" placeholder="Mins" class="w-20 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white text-center focus:outline-none">
+                            <div class="flex bg-slate-900 p-1 rounded-lg border border-slate-700 flex-1">
+                                <input type="hidden" id="new-sess-type" value="work">
+                                <button type="button" class="type-toggle-btn flex-1 bg-blue-600 text-white text-xs px-2 rounded-md font-bold transition-all shadow-md" data-val="work">Study</button>
+                                <button type="button" class="type-toggle-btn flex-1 bg-transparent text-slate-400 text-xs px-2 rounded-md font-bold transition-all" data-val="break">Break</button>
+                            </div>
+                        </div>
+                        <button id="add-sess-btn" class="w-full bg-emerald-600 text-white font-bold px-4 py-2 rounded-lg mt-1 active:scale-95 transition-all">Add Block</button>
+                    </div>
+                    
+                    <div id="settings-list" class="flex flex-col gap-2 max-h-[30vh] native-scroll"></div>
+                    
+                    <button id="load-day-btn" class="w-full mt-4 bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2">
+                        <span>🌅</span> Overwrite Live Protocol With This Day
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vault Page -->
+        <div id="page-vault" class="app-page absolute inset-0 flex-col items-center p-4 native-scroll pb-24 bg-[#020617]">
+            <div class="w-full max-w-2xl flex flex-col">
+                <h2 class="text-lg font-bold text-white mb-3 border-b border-slate-800 pb-2">📚 NEET Vault</h2>
+                
+                <div class="flex gap-2 mb-4 bg-slate-900 p-1 rounded-xl border border-slate-800 overflow-x-auto no-scrollbar shrink-0" id="task-tabs">
+                    <button class="task-tab flex-1 min-w-[70px] bg-purple-600 text-white font-bold py-2 px-2 rounded-lg text-xs shadow-md transition-all" data-tab="backlog">Backlog</button>
+                    <button class="task-tab flex-1 min-w-[70px] bg-transparent text-slate-400 font-bold py-2 px-2 rounded-lg text-xs transition-all" data-tab="revision">Revision</button>
+                    <button class="task-tab flex-1 min-w-[70px] bg-transparent text-slate-400 font-bold py-2 px-2 rounded-lg text-xs transition-all" data-tab="mcq">Daily MCQ</button>
+                    <button class="task-tab flex-1 min-w-[70px] bg-transparent text-slate-400 font-bold py-2 px-2 rounded-lg text-xs transition-all" data-tab="matrix">Matrix</button>
+                </div>
+
+                <div id="subject-filter-container" class="flex gap-2 mb-4 shrink-0">
+                    <input type="hidden" id="active-subject-input" value="Physics">
+                    <button class="subj-btn active flex-1 bg-slate-700 text-white border border-slate-600 font-bold py-2 rounded-lg text-xs transition-all shadow-sm" data-subj="Physics">Physics</button>
+                    <button class="subj-btn flex-1 bg-slate-900 text-slate-400 border border-slate-800 font-bold py-2 rounded-lg text-xs transition-all" data-subj="Chemistry">Chem</button>
+                    <button class="subj-btn flex-1 bg-slate-900 text-slate-400 border border-slate-800 font-bold py-2 rounded-lg text-xs transition-all" data-subj="Biology">Biology</button>
+                </div>
+
+                <div id="task-add-form" class="flex flex-col gap-2 mb-4 shrink-0 bg-slate-900 p-3 rounded-xl border border-slate-800">
+                    <input type="text" id="task-title-input" placeholder="Chapter name or topic..." class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none">
+                    <button id="add-task-btn" class="w-full bg-purple-600 text-white font-bold px-4 py-2 rounded-lg text-sm active:scale-95 transition-all shadow-md">Add to Vault</button>
+                </div>
+
+                <div id="mcq-add-form" class="hidden bg-slate-900 border border-slate-800 p-4 rounded-xl mb-4 shrink-0">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xs text-blue-400 font-bold uppercase tracking-widest" id="mcq-subject-title">Physics Daily Target</h3>
+                        <button id="save-mcq-btn" class="bg-blue-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-md active:scale-95 transition-all shadow-sm">Save Stats</button>
+                    </div>
+                    <div class="flex gap-2 mb-4">
+                        <div class="flex-1"><label class="text-[10px] text-slate-400 block mb-1 font-bold">Target</label><input type="number" id="mcq-target" class="w-full bg-slate-950 border border-slate-700 rounded-md p-2 text-sm text-white text-center font-mono focus:outline-none"></div>
+                        <div class="flex-1"><label class="text-[10px] text-slate-400 block mb-1 font-bold">Attempted</label><input type="number" id="mcq-attempted" class="w-full bg-slate-950 border border-slate-700 rounded-md p-2 text-sm text-white text-center font-mono focus:outline-none"></div>
+                        <div class="flex-1"><label class="text-[10px] text-slate-400 block mb-1 font-bold">Correct</label><input type="number" id="mcq-correct" class="w-full bg-slate-950 border border-slate-700 rounded-md p-2 text-sm text-white text-center font-mono focus:outline-none"></div>
+                    </div>
+                    <div class="flex justify-around bg-slate-950 rounded-lg p-3 border border-slate-800">
+                        <div class="text-center"><span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Incorrect</span><p id="mcq-display-incorrect" class="text-xl font-bold text-tomato font-mono mt-1">0</p></div>
+                        <div class="w-px bg-slate-800"></div>
+                        <div class="text-center"><span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Left</span><p id="mcq-display-left" class="text-xl font-bold text-amber-400 font-mono mt-1">0</p></div>
+                    </div>
+                </div>
+
+                <div id="vault-list-container" class="flex flex-col gap-2 shrink-0"></div>
+            </div>
+        </div>
+
+        <!-- Settings & Profile Page -->
+        <div id="page-settings" class="app-page absolute inset-0 flex-col items-center p-4 pb-24 bg-[#020617] no-scroll">
+            <div class="w-full max-w-2xl flex flex-col h-full">
+                <h2 class="text-lg font-bold text-white mb-2 border-b border-slate-800 pb-2 shrink-0">⚙️ Profile & Settings</h2>
+                
+                <div class="flex gap-2 mb-4 bg-slate-900 p-1 rounded-xl border border-slate-800 shrink-0" id="prof-tabs">
+                    <button class="prof-tab flex-1 bg-blue-600 text-white font-bold py-2 rounded-lg text-xs shadow-md transition-all" data-tab="prof-stats">Stats</button>
+                    <button class="prof-tab flex-1 bg-transparent text-slate-400 font-bold py-2 rounded-lg text-xs transition-all" data-tab="prof-sync">Cloud</button>
+                    <button class="prof-tab flex-1 bg-transparent text-slate-400 font-bold py-2 rounded-lg text-xs transition-all" data-tab="prof-coach">Coach</button>
+                </div>
+
+                <div class="flex-1 relative w-full">
+                    
+                    <!-- Stats & Telegram Panel -->
+                    <div id="prof-stats" class="prof-panel absolute inset-0 flex flex-col gap-3">
+                        <div class="grid grid-cols-2 gap-3 shrink-0">
+                            <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 text-center">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Focus Today</p>
+                                <p id="stat-today-mins" class="text-2xl font-mono font-bold text-emerald-400">0<span class="text-xs text-slate-500 ml-1">m</span></p>
+                            </div>
+                            <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 text-center">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Sessions</p>
+                                <p id="stat-today-sessions" class="text-2xl font-mono font-bold text-blue-400">0</p>
+                            </div>
+                        </div>
+                        <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 flex justify-between items-center shrink-0">
+                            <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">7-Day Total</span>
+                            <span id="stat-weekly-total" class="text-lg font-mono font-bold text-blue-400">0m</span>
+                        </div>
+                        <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 flex flex-col gap-2 shrink-0 mt-auto">
+                            <h3 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">✈️ Telegram God-Mode</h3>
+                            <div class="flex gap-2">
+                                <input type="password" id="tg-token-input" placeholder="Bot Token" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none">
+                                <input type="password" id="tg-chatid-input" placeholder="Chat ID" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none">
+                            </div>
+                            <div class="flex gap-2">
+                                <button id="save-tg-btn" class="flex-1 bg-emerald-600/20 text-emerald-500 font-bold py-1.5 rounded-lg text-xs active:scale-95 border border-emerald-500/30">Save Keys</button>
+                                <button id="disconnect-tg-btn" class="flex-1 bg-red-600/20 text-red-500 font-bold py-1.5 rounded-lg text-xs active:scale-95 border border-red-500/30">Disconnect</button>
+                            </div>
+                            <button id="send-report-btn" class="w-full bg-blue-600 text-white font-bold py-1.5 rounded-lg text-xs active:scale-95 shadow-md mt-1">Send Report</button>
+                        </div>
+                    </div>
+
+                    <!-- Sync Panel -->
+                    <div id="prof-sync" class="prof-panel hidden absolute inset-0 flex flex-col gap-3">
+                        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex flex-col gap-3 shrink-0">
+                            <h3 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">☁️ Omni-Cloud Sync</h3>
+                            <input type="text" id="sync-email-input" placeholder="Room ID (e.g. adil123)" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none">
+                            <div class="relative w-full">
+                                <input type="password" id="sync-pass-input" placeholder="Security Key" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none pr-10">
+                                <button id="toggle-sync-pass-btn" type="button" class="absolute inset-y-0 right-1 px-3 text-slate-500 flex items-center">👁️</button>
+                            </div>
+                            <div id="sync-status" class="hidden text-[10px] font-bold tracking-wide py-2 px-3 rounded-md bg-emerald-900/30 text-emerald-400 border border-emerald-800/50">✅ Connected!</div>
+                            <button id="login-sync-btn" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg text-sm active:scale-95 transition-all shadow-md">Connect System</button>
+                        </div>
+                    </div>
+
+                    <!-- Coach & Danger Panel -->
+                    <div id="prof-coach" class="prof-panel hidden absolute inset-0 flex flex-col gap-3">
+                        <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 flex flex-col gap-2 shrink-0">
+                            <h3 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">🔥 AI Coach Quotes</h3>
+                            <label class="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Study Quotes (1 per line)</label>
+                            <textarea id="custom-study-quotes" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none h-14 resize-none"></textarea>
+                            <label class="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Break Rules (1 per line)</label>
+                            <textarea id="custom-break-quotes" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none h-14 resize-none"></textarea>
+                            <button id="save-coach-btn" class="w-full bg-slate-800 text-slate-200 font-bold py-1.5 rounded-lg text-xs active:scale-95 border border-slate-700">Save Quotes</button>
+                        </div>
+                        <div class="bg-red-900/10 p-3 rounded-xl border border-red-900/30 flex flex-col gap-2 shrink-0 mt-auto">
+                            <h3 class="text-xs font-bold text-red-500 uppercase tracking-wider">Danger Zone</h3>
+                            <button id="factory-reset-btn" class="w-full bg-red-600/20 text-red-500 font-bold py-2 rounded-lg text-xs active:scale-95 border border-red-500/30 transition-all">🗑️ Factory Reset App (Wipe Cloud & Local)</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav fixed bottom-0 left-0 right-0 h-16 sm:h-20 flex justify-around items-center px-2 pb-safe z-[100]">
+        <button class="nav-btn nav-item active flex flex-col items-center gap-1 w-16" data-target="page-timer">
+            <span class="text-xl sm:text-2xl">⏱️</span><span class="text-[10px] sm:text-xs font-bold">Timer</span>
+            <div class="nav-indicator w-1 h-1 rounded-full bg-blue-500 mt-0.5 opacity-0 transform scale-0 transition-all"></div>
+        </button>
+        <button class="nav-btn nav-item flex flex-col items-center gap-1 w-16" data-target="page-schedule">
+            <span class="text-xl sm:text-2xl">🗓️</span><span class="text-[10px] sm:text-xs font-bold">Plan</span>
+            <div class="nav-indicator w-1 h-1 rounded-full bg-blue-500 mt-0.5 opacity-0 transform scale-0 transition-all"></div>
+        </button>
+        <button class="nav-btn nav-item flex flex-col items-center gap-1 w-16" data-target="page-vault">
+            <span class="text-xl sm:text-2xl">📚</span><span class="text-[10px] sm:text-xs font-bold">Vault</span>
+            <div class="nav-indicator w-1 h-1 rounded-full bg-blue-500 mt-0.5 opacity-0 transform scale-0 transition-all"></div>
+        </button>
+        <button class="nav-btn nav-item flex flex-col items-center gap-1 w-16" data-target="page-settings">
+            <span class="text-xl sm:text-2xl">⚙️</span><span class="text-[10px] sm:text-xs font-bold">Profile</span>
+            <div class="nav-indicator w-1 h-1 rounded-full bg-blue-500 mt-0.5 opacity-0 transform scale-0 transition-all"></div>
+        </button>
+    </div>
+
+    <!-- Break Guide Overlay -->
+    <div id="full-screen-guide-overlay" class="hidden fixed inset-0 bg-slate-950/95 backdrop-blur-xl z-[200] flex items-center justify-center p-6 text-center flex-col">
+        <h2 class="text-3xl font-phase text-blue-400 mb-6 uppercase tracking-widest drop-shadow-[0_0_15px_rgba(96,165,250,0.5)]">Break Protocol Active</h2>
+        <div class="bg-blue-900/20 border border-blue-800/50 p-6 rounded-3xl shadow-2xl w-full max-w-lg mb-8"><p id="full-screen-guide-text" class="text-xl text-slate-200 font-medium leading-relaxed"></p></div>
+        <button id="close-guide-btn" class="bg-slate-800 text-white font-bold py-3 px-8 rounded-full border border-slate-700 active:scale-95">Dismiss</button>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="custom-toast" class="hidden fixed top-6 right-6 left-6 sm:left-auto bg-slate-800/90 backdrop-blur-md border border-slate-700 text-white font-bold py-3 px-5 rounded-xl shadow-2xl z-[999] text-xs sm:text-sm text-center transition-opacity"></div>
+
+    <script>
+        function safeGet(key, def) { try { return localStorage.getItem(key) || def; } catch(e) { return def; } }
+        function safeSet(key, val) { try { localStorage.setItem(key, val); } catch(e) {} }
+        function getLocalTodayString() { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().split('T')[0]; }
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById('custom-toast');
+            toast.textContent = msg;
+            toast.className = `fixed top-6 right-6 left-6 sm:left-auto backdrop-blur-md border font-bold py-3 px-5 rounded-xl shadow-2xl z-[999] text-sm text-center ${isError ? 'bg-red-900/90 border-red-500 text-red-100' : 'bg-emerald-900/90 border-emerald-500 text-emerald-100'}`;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAbi9-V0S3DOtOAgBirMxrvV6J-XdwLf3Q",
+            authDomain: "neettimercloud.firebaseapp.com",
+            projectId: "neettimercloud",
+            storageBucket: "neettimercloud.firebasestorage.app",
+            messagingSenderId: "337999532676",
+            appId: "1:337999532676:web:545ae526ab038192e3e8d1"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        let isAuthReady = false;
+        async function authenticateForCloud() {
+            try {
+                await auth.signInAnonymously();
+                isAuthReady = true;
+                return true;
+            } catch (err) {
+                isAuthReady = true; 
+                return true;
+            }
+        }
+        authenticateForCloud();
+
+        let autoDimTimeout = null;
+
+        function resetAutoDim() {
+            clearTimeout(autoDimTimeout);
+            if (isRunning && !document.body.classList.contains('dim-mode')) {
+                autoDimTimeout = setTimeout(() => {
+                    document.body.classList.add('dim-mode');
+                    lastRenderedTime = -1; 
+                    updateDisplay();
+                }, 60000); // 1 minute (60000ms)
+            }
+        }
+
+        function exitDimMode() {
+            if (document.body.classList.contains('dim-mode')) {
+                document.body.classList.remove('dim-mode');
+                lastRenderedTime = -1;
+                updateDisplay();
+                resetAutoDim();
+            }
+        }
+
+        document.body.addEventListener('click', (e) => {
+            if (document.body.classList.contains('dim-mode')) {
+                if (e.target.closest('#dim-btn')) return; 
+                exitDimMode();
+            } else {
+                resetAutoDim(); 
+            }
+        });
+
+        document.getElementById('dim-btn')?.addEventListener('click', (e) => { 
+            e.stopPropagation(); 
+            if (document.body.classList.contains('dim-mode')) {
+                exitDimMode();
+            } else {
+                document.body.classList.add('dim-mode'); 
+                lastRenderedTime = -1; 
+                updateDisplay(); 
+                clearTimeout(autoDimTimeout);
+            }
+        });
+
+        function switchPage(targetId) {
+            document.querySelectorAll('.app-page').forEach(page => page.classList.remove('active-page'));
+            document.getElementById(targetId).classList.add('active-page');
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if (btn.getAttribute('data-target') === targetId) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+            if(targetId === 'page-schedule') { renderSchedule(); populateSettingsList(); }
+            if(targetId === 'page-vault') renderTasks(activeTaskTab);
+            if(targetId === 'page-settings') renderStats();
+        }
+
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => switchPage(e.currentTarget.getAttribute('data-target')));
+        });
+
+        document.querySelectorAll('.prof-tab').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                const targetId = e.currentTarget.getAttribute('data-tab');
+                document.querySelectorAll('.prof-tab').forEach(t => t.className = "prof-tab flex-1 bg-transparent text-slate-400 font-bold py-2 rounded-lg text-xs transition-all");
+                e.currentTarget.className = "prof-tab flex-1 bg-blue-600 text-white font-bold py-2 rounded-lg text-xs shadow-md transition-all";
+                document.querySelectorAll('.prof-panel').forEach(p => p.classList.add('hidden'));
+                document.getElementById(targetId).classList.remove('hidden');
+            });
+        });
+
+        const cleanSlate = [];
+        let schedule = JSON.parse(safeGet('pages_pomodoro_schedule_v8', JSON.stringify(cleanSlate)));
+        let weeklyTemplates = JSON.parse(safeGet('pages_pomodoro_weekly_v8', null));
+        if (!weeklyTemplates) {
+            weeklyTemplates = {0:[], 1:[], 2:[], 3:[], 4:[], 5:[], 6:[]};
+            safeSet('pages_pomodoro_weekly_v8', JSON.stringify(weeklyTemplates));
+        }
+        
+        let activeTemplateDay = new Date().getDay();
+        let currentStepIndex = 0, timeLeft = 0, timerInterval = null, isRunning = false;
+        let targetEndTime = 0, accumulatedStudyTime = 0, isOvertime = false;
+        let lastRenderedTime = -1, guidePopupTimeout, lastPopupStep = -1;
+
+        const defaultStudyQuotes = ["No distractions. Lock in.", "Your competition is working right now.", "Pain is temporary. NEET rank is forever."];
+        const defaultBreakQuotes = ["Hydrate. Breathe.", "Stand up and stretch.", "Rest your eyes. 20-20-20 rule."];
+        let studyQuotes = JSON.parse(safeGet('pages_pomodoro_study_q', JSON.stringify(defaultStudyQuotes)));
+        let breakQuotes = JSON.parse(safeGet('pages_pomodoro_break_q', JSON.stringify(defaultBreakQuotes)));
+        
+        document.getElementById('custom-study-quotes').value = studyQuotes.join('\n');
+        document.getElementById('custom-break-quotes').value = breakQuotes.join('\n');
+
+        let currentSyncRoom = safeGet('pages_pomodoro_sync_room', '');
+        let currentSyncPass = safeGet('pages_pomodoro_sync_pass', '');
+        let unsubscribeSnapshot = null;
+        let isInternalSyncUpdate = false;
+
+        function updateSyncUI(status, msg) {
+            const statusEl = document.getElementById('sync-status');
+            const btn = document.getElementById('login-sync-btn');
+            statusEl.classList.remove('hidden', 'bg-emerald-900/30', 'text-emerald-400', 'border-emerald-800/50', 'bg-red-900/30', 'text-red-400', 'border-red-800/50', 'bg-blue-900/30', 'text-blue-400', 'border-blue-800/50');
+            
+            if (status === 'verifying') {
+                statusEl.classList.add('bg-blue-900/30', 'text-blue-400', 'border-blue-800/50');
+                statusEl.innerHTML = `⏳ ${msg}`;
+                btn.textContent = "Connecting..."; btn.disabled = true;
+            } else if (status === 'connected') {
+                statusEl.classList.add('bg-emerald-900/30', 'text-emerald-400', 'border-emerald-800/50');
+                statusEl.innerHTML = `✅ ${msg}`;
+                btn.textContent = "Disconnect System"; btn.disabled = false;
+            } else if (status === 'error') {
+                statusEl.classList.add('bg-red-900/30', 'text-red-400', 'border-red-800/50');
+                statusEl.innerHTML = `❌ ${msg}`;
+                btn.textContent = "Connect System"; btn.disabled = false;
+            } else if (status === 'disconnected') {
+                statusEl.classList.add('hidden');
+                btn.textContent = "Connect System"; btn.disabled = false;
+            }
+        }
+
+        async function broadcastToCloud() {
+            if (!currentSyncRoom || isInternalSyncUpdate || !isAuthReady) return;
+            try {
+                let tasksStr = safeGet('pages_pomodoro_tasks_v8', '[]');
+                let weeklyStr = safeGet('pages_pomodoro_weekly_v8', null);
+                let statsStr = safeGet('pages_pomodoro_stats_v8', '{"history":{}}');
+                let mcqStr = safeGet('pages_pomodoro_mcq_v8', '{}');
+                
+                const roomDoc = db.collection('artifacts').doc('neettimercloud').collection('public').doc('data').collection('sync_rooms').doc(currentSyncRoom);
+                await roomDoc.set({
+                    password: currentSyncPass,
+                    stepIndex: currentStepIndex, timeLeft: timeLeft, isRunning: isRunning, targetEndTime: targetEndTime,
+                    schedule: schedule, tasksStr: tasksStr, weeklyStr: weeklyStr, statsStr: statsStr, mcqStr: mcqStr,
+                    studyQuotesStr: JSON.stringify(studyQuotes), breakQuotesStr: JSON.stringify(breakQuotes),
+                    timestamp: Date.now()
+                }, { merge: true });
+            } catch(e) {}
+        }
+
+        async function connectToCloud(roomId) {
+            if (!isAuthReady) await authenticateForCloud();
+            try {
+                if (unsubscribeSnapshot) unsubscribeSnapshot();
+                
+                const roomDoc = db.collection('artifacts').doc('neettimercloud').collection('public').doc('data').collection('sync_rooms').doc(roomId);
+                unsubscribeSnapshot = roomDoc.onSnapshot((docSnap) => {
+                    if (docSnap.exists) {
+                        const data = docSnap.data(); isInternalSyncUpdate = true;
+                        
+                        if (data.schedule && JSON.stringify(schedule) !== JSON.stringify(data.schedule)) { schedule = data.schedule; safeSet('pages_pomodoro_schedule_v8', JSON.stringify(schedule)); renderSchedule(); }
+                        if (data.stepIndex !== undefined && currentStepIndex !== data.stepIndex) { loadStep(data.stepIndex, true); }
+                        
+                        if (data.isRunning !== undefined) {
+                            if (data.isRunning && !isRunning) { targetEndTime = data.targetEndTime; let rem = Math.round((targetEndTime - Date.now()) / 1000); timeLeft = rem > 0 ? rem : 0; startTimer(true); } 
+                            else if (!data.isRunning && isRunning) { timeLeft = data.timeLeft; stopTimer(true); }
+                        } else if (!isRunning && data.timeLeft !== undefined) { timeLeft = data.timeLeft; updateDisplay(); }
+                        
+                        if (data.tasksStr && safeGet('pages_pomodoro_tasks_v8', '[]') !== data.tasksStr) { safeSet('pages_pomodoro_tasks_v8', data.tasksStr); renderTasks(activeTaskTab); }
+                        if (data.weeklyStr && safeGet('pages_pomodoro_weekly_v8', null) !== data.weeklyStr) { safeSet('pages_pomodoro_weekly_v8', data.weeklyStr); weeklyTemplates = JSON.parse(data.weeklyStr); populateSettingsList(); }
+                        if (data.statsStr && safeGet('pages_pomodoro_stats_v8', '{"history":{}}') !== data.statsStr) { safeSet('pages_pomodoro_stats_v8', data.statsStr); renderStats(); }
+                        if (data.mcqStr && safeGet('pages_pomodoro_mcq_v8', '{}') !== data.mcqStr) { safeSet('pages_pomodoro_mcq_v8', data.mcqStr); if(activeTaskTab === 'mcq') loadMCQInputs(); if(activeTaskTab === 'matrix') renderTasks('matrix'); }
+                        
+                        // Parse Coach Quotes
+                        if (data.studyQuotesStr && safeGet('pages_pomodoro_study_q', '') !== data.studyQuotesStr) {
+                            safeSet('pages_pomodoro_study_q', data.studyQuotesStr);
+                            studyQuotes = JSON.parse(data.studyQuotesStr);
+                            document.getElementById('custom-study-quotes').value = studyQuotes.join('\n');
+                        }
+                        if (data.breakQuotesStr && safeGet('pages_pomodoro_break_q', '') !== data.breakQuotesStr) {
+                            safeSet('pages_pomodoro_break_q', data.breakQuotesStr);
+                            breakQuotes = JSON.parse(data.breakQuotesStr);
+                            document.getElementById('custom-break-quotes').value = breakQuotes.join('\n');
+                        }
+                        
+                        isInternalSyncUpdate = false;
+                    }
+                });
+            } catch(e) { }
+        }
+
+        // Auto-Boot Sequence
+        if (currentSyncRoom) { 
+            document.getElementById('sync-email-input').value = currentSyncRoom;
+            document.getElementById('sync-pass-input').value = currentSyncPass;
+            updateSyncUI('connected', 'Connected!');
+            connectToCloud(currentSyncRoom); 
+        }
+
+        // Secure Lock & Key Verification
+        document.getElementById('login-sync-btn').addEventListener('click', async (e) => {
+            if (currentSyncRoom) { 
+                currentSyncRoom = ''; currentSyncPass = '';
+                safeSet('pages_pomodoro_sync_room', ''); safeSet('pages_pomodoro_sync_pass', ''); 
+                if(unsubscribeSnapshot) { unsubscribeSnapshot(); unsubscribeSnapshot = null; } 
+                updateSyncUI('disconnected', '');
+                document.getElementById('sync-email-input').value = ''; document.getElementById('sync-pass-input').value = '';
+                showToast("System Disconnected");
+            } else {
+                const em = document.getElementById('sync-email-input').value.trim(); 
+                const pw = document.getElementById('sync-pass-input').value.trim();
+                
+                if (em && pw) { 
+                    if (!isAuthReady) await authenticateForCloud();
+                    updateSyncUI('verifying', 'Verifying Security Key...');
+                    
+                    try {
+                        const roomDoc = db.collection('artifacts').doc('neettimercloud').collection('public').doc('data').collection('sync_rooms').doc(em);
+                        const docSnap = await roomDoc.get();
+                        
+                        if (docSnap.exists) {
+                            const data = docSnap.data();
+                            if (data.password && data.password !== pw) {
+                                updateSyncUI('error', 'Access Denied: Incorrect Password');
+                                showToast("Incorrect Password!", true);
+                                return; // Block connection
+                            }
+                            updateSyncUI('connected', 'Connected & Syncing!');
+                            showToast("Cloud Restored!");
+                        } else {
+                            await roomDoc.set({ password: pw, timestamp: Date.now() });
+                            updateSyncUI('connected', 'New Cloud Room Created!');
+                            showToast("New Room Secured!", false);
+                        }
+                        
+                        currentSyncRoom = em; currentSyncPass = pw;
+                        safeSet('pages_pomodoro_sync_room', currentSyncRoom);
+                        safeSet('pages_pomodoro_sync_pass', currentSyncPass);
+                        
+                        connectToCloud(currentSyncRoom);
+                        broadcastToCloud();
+                        
+                    } catch(err) {
+                        updateSyncUI('error', 'Connection failed. Check network.');
+                    }
+                } else showToast("Enter Room ID and Key", true);
+            }
+        });
+
+        document.getElementById('toggle-sync-pass-btn').addEventListener('click', () => {
+            const inp = document.getElementById('sync-pass-input');
+            inp.type = inp.type === 'password' ? 'text' : 'password';
+        });
+
+        async function sendTelegramMessage() {
+            const token = safeGet('pages_pomodoro_tg_token', document.getElementById('tg-token-input').value.trim());
+            const chatId = safeGet('pages_pomodoro_tg_chatid', document.getElementById('tg-chatid-input').value.trim());
+            if (!token || !chatId) { showToast("Set Telegram keys in Settings", true); return; }
+
+            let stats = JSON.parse(safeGet('pages_pomodoro_stats_v8', '{"history":{}}')); let today = getLocalTodayString();
+            let todayData = stats.history[today] || { mins: 0, sessions: 0 };
+            let tasks = JSON.parse(safeGet('pages_pomodoro_tasks_v8', '[]'));
+            let mcqs = JSON.parse(safeGet('pages_pomodoro_mcq_v8', '{}')); let mData = mcqs[today] || {};
+            
+            let bDone = tasks.filter(t => t.type === 'backlog' && t.completed).length; 
+            let rDone = tasks.filter(t => t.type === 'revision' && t.completed).length;
+            let compCount = schedule.filter(s => s.status === 'completed').length;
+
+            let text = `🩺 *NEET DAILY PROGRESS REPORT* 🩺\n\n⏱️ *Focus Time:* ${todayData.mins} mins\n✅ *Blocks Completed:* ${compCount}/${Math.max(1, schedule.length)}\n\n🎯 *DAILY MCQ TARGETS:*\n`;
+            ['Physics', 'Chemistry', 'Biology'].forEach(subj => {
+                let d = mData[subj] || {t:0, a:0, c:0};
+                let inc = Math.max(0, d.a - d.c); let lft = Math.max(0, d.t - d.a);
+                text += `*${subj}:* Att: ${d.a}/${d.t} | ✅ ${d.c} | ❌ ${inc} | ⏳ ${lft}\n`;
+            });
+            text += `\n📚 *VAULT PROGRESS:*\n📦 Backlogs Cleared: ${bDone}\n🔁 Revisions Done: ${rDone}\n\n🔥 *Protocol Complete. Ready for tomorrow.*`;
+
+            try { 
+                await fetch(`https://api.telegram.org/bot${token}/sendMessage`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: chatId, text: text, parse_mode: 'Markdown' }) }); 
+                showToast("Sent to Telegram!");
+            } catch(e) { showToast("Telegram Error. Check internet.", true); }
+        }
+
+        document.getElementById('save-tg-btn').addEventListener('click', () => {
+            safeSet('pages_pomodoro_tg_token', document.getElementById('tg-token-input').value.trim());
+            safeSet('pages_pomodoro_tg_chatid', document.getElementById('tg-chatid-input').value.trim());
+            showToast("Telegram Keys Saved");
+        });
+        
+        document.getElementById('disconnect-tg-btn').addEventListener('click', () => {
+            safeSet('pages_pomodoro_tg_token', '');
+            safeSet('pages_pomodoro_tg_chatid', '');
+            document.getElementById('tg-token-input').value = '';
+            document.getElementById('tg-chatid-input').value = '';
+            showToast("Telegram Disconnected!");
+        });
+
+        document.getElementById('send-report-btn').addEventListener('click', sendTelegramMessage);
+
+        document.getElementById('tg-token-input').value = safeGet('pages_pomodoro_tg_token', '');
+        document.getElementById('tg-chatid-input').value = safeGet('pages_pomodoro_tg_chatid', '');
+        
+        document.getElementById('save-coach-btn').addEventListener('click', () => {
+            const sq = document.getElementById('custom-study-quotes').value.trim(); const bq = document.getElementById('custom-break-quotes').value.trim();
+            studyQuotes = sq ? sq.split('\n').filter(q=>q.trim()!=='') : defaultStudyQuotes;
+            breakQuotes = bq ? bq.split('\n').filter(q=>q.trim()!=='') : defaultBreakQuotes;
+            safeSet('pages_pomodoro_study_q', JSON.stringify(studyQuotes)); safeSet('pages_pomodoro_break_q', JSON.stringify(breakQuotes));
+            showToast("Coach Quotes Saved");
+            broadcastToCloud(); // Fire the payload to the cloud
+        });
+
+        const timeDisplay = document.getElementById('time-display');
+        const sessionTypeDisplay = document.getElementById('session-type');
+        const currentPhaseDisplay = document.getElementById('current-phase-display');
+        
+        let lastPersistedTime = -1;
+        function persistState() { 
+            if(timeLeft === lastPersistedTime && isRunning) return; 
+            lastPersistedTime = timeLeft;
+            safeSet('pages_pomodoro_app_state_v8', JSON.stringify({ currentStepIndex, timeLeft, isRunning, targetEndTime, accumulatedStudyTime, isOvertime })); 
+        }
+
+        function renderSchedule() {
+            const cont = document.getElementById('schedule-container'); if(!cont) return; cont.innerHTML = '';
+            if (schedule.length === 0) { cont.innerHTML = `<p class="text-slate-500 italic p-4 text-xs text-center">Protocol empty. Build daily template below.</p>`; document.getElementById('session-count-badge').textContent = `0 Remaining`; return; }
+            let activeCount = schedule.filter(s => s.status !== 'completed' && s.status !== 'skipped').length;
+            document.getElementById('session-count-badge').textContent = `${activeCount} Remaining`;
+
+            schedule.forEach((item, index) => {
+                const div = document.createElement('div');
+                let baseClasses = "flex justify-between items-center p-3 rounded-xl border border-slate-800 transition-colors cursor-pointer ";
+                if (index === currentStepIndex) baseClasses += "bg-blue-900/30 border-blue-500/50 ";
+                else if (item.status === 'completed' || item.status === 'skipped') baseClasses += "opacity-40 line-through bg-slate-900 ";
+                else baseClasses += "bg-slate-900 ";
+
+                div.className = baseClasses; div.onclick = () => { if (index !== currentStepIndex) jumpToStep(index); switchPage('page-timer'); };
+                const mins = Math.floor(item.duration / 60); const icon = item.type === 'work' ? '🧠' : '💧';
+                div.innerHTML = `<div class="flex items-center gap-3 min-w-0"><span class="text-lg">${icon}</span><span class="text-sm font-bold text-slate-200 truncate ${index === currentStepIndex ? 'text-blue-400' : ''}">${item.title}</span></div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <button onclick="event.stopPropagation(); quickComplete(${index})" class="text-emerald-500 bg-slate-950 px-2 py-1 rounded border border-slate-800 text-[10px]">✅</button>
+                        <span class="text-xs font-mono text-slate-400 bg-slate-950 px-2 py-1 rounded border border-slate-800">${mins}m</span>
+                    </div>`;
+                cont.appendChild(div);
+            });
+        }
+
+        window.quickComplete = function(index) { if (index === currentStepIndex) completeSession(); else { schedule[index].status = 'completed'; safeSet('pages_pomodoro_schedule_v8', JSON.stringify(schedule)); renderSchedule(); broadcastToCloud(); } };
+
+        function loadStep(index, preserveState = false) {
+            currentStepIndex = Math.max(0, Math.min(index, schedule.length)); isOvertime = false; timeDisplay?.classList.remove('overtime-glow');
+            
+            if (currentStepIndex >= schedule.length || schedule.length === 0) {
+                timeLeft = 0; updateDisplay();
+                sessionTypeDisplay.textContent = schedule.length === 0 ? "No Sessions Loaded" : "Done"; 
+                currentPhaseDisplay.textContent = schedule.length === 0 ? "PROTOCOL EMPTY" : "PROTOCOL COMPLETE";
+                currentPhaseDisplay.className = schedule.length === 0 ? "mt-3 bg-slate-500/10 px-6 py-1.5 rounded-full text-xs font-bold text-slate-400 border border-slate-500/20 uppercase tracking-widest font-phase shadow-inner" : "mt-3 bg-emerald-500/10 px-6 py-1.5 rounded-full text-xs font-bold text-emerald-400 border border-emerald-500/20 uppercase tracking-widest font-phase shadow-inner";
+                document.getElementById('anim-study')?.classList.add('hidden'); document.getElementById('anim-break')?.classList.add('hidden');
+                document.getElementById('guide-box-title').textContent = schedule.length === 0 ? "🤖 System Ready" : "🎉 Day Complete"; 
+                document.getElementById('deep-guide-text').textContent = schedule.length === 0 ? "Go to Plan tab to build your daily protocol." : "Incredible work today. The white coat awaits.";
+                stopTimer(); document.getElementById('start-btn').classList.add('hidden'); document.getElementById('pause-btn').classList.add('hidden'); document.getElementById('complete-main-btn').classList.add('hidden');
+                renderSchedule(); persistState(); 
+                if (schedule.length > 0 && currentStepIndex >= schedule.length) sendTelegramMessage(); 
+                return;
+            }
+
+            const currentSession = schedule[currentStepIndex];
+            if(!preserveState) timeLeft = currentSession.duration;
+            sessionTypeDisplay.textContent = currentSession.title;
+            
+            document.getElementById('start-btn').classList.remove('hidden'); document.getElementById('pause-btn').classList.add('hidden'); document.getElementById('complete-main-btn').classList.add('hidden');
+            
+            currentPhaseDisplay.textContent = currentSession.type === 'work' ? "DEEP STUDY PHASE" : "RECOVERY PHASE";
+            currentPhaseDisplay.className = currentSession.type === 'work' ? "mt-3 bg-tomato/10 px-6 py-1.5 rounded-full text-xs font-bold text-tomato border border-tomato/30 uppercase tracking-widest font-phase shadow-inner" : "mt-3 bg-blue-500/10 px-6 py-1.5 rounded-full text-xs font-bold text-blue-400 border border-blue-500/20 uppercase tracking-widest font-phase shadow-inner";
+
+            if (currentSession.type === 'work') {
+                document.getElementById('guide-box-title').textContent = "🔥 Coach: Focus Protocol"; document.getElementById('guide-box-title').className = "text-[10px] uppercase font-bold tracking-widest text-tomato mb-2 flex items-center gap-2";
+                document.getElementById('deep-guide-text').textContent = studyQuotes[Math.floor(Math.random() * studyQuotes.length)];
+                document.getElementById('anim-study')?.classList.remove('hidden'); document.getElementById('anim-break')?.classList.add('hidden');
+            } else {
+                document.getElementById('guide-box-title').textContent = "💧 Coach: Break Protocol"; document.getElementById('guide-box-title').className = "text-[10px] uppercase font-bold tracking-widest text-blue-400 mb-2 flex items-center gap-2";
+                document.getElementById('deep-guide-text').textContent = breakQuotes[Math.floor(Math.random() * breakQuotes.length)];
+                document.getElementById('anim-study')?.classList.add('hidden'); document.getElementById('anim-break')?.classList.remove('hidden');
+            }
+
+            lastRenderedTime = -1; updateDisplay(); renderSchedule();
+            if (currentStepIndex > 0 && !isRunning && !preserveState) playAlarmSound();
+            persistState();
+        }
+
+        function updateDisplay() {
+            if (timeLeft === lastRenderedTime && !isOvertime) return; lastRenderedTime = timeLeft;
+            const m = Math.floor(timeLeft / 60); const s = timeLeft % 60;
+            const t = `${isOvertime ? '+' : ''}${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            timeDisplay.textContent = t;
+        }
+
+        function timerCoreTick() {
+            if (!isRunning) return; 
+            const now = Date.now(); 
+            const remaining = Math.round((targetEndTime - now) / 1000);
+            
+            if (timeLeft !== remaining || remaining <= 0) {
+                if (remaining <= 0) {
+                    if (!isOvertime) { isOvertime = true; playAlarmSound(); timeDisplay.classList.add('overtime-glow'); document.getElementById('pause-btn').classList.add('hidden'); document.getElementById('complete-main-btn').classList.remove('hidden'); }
+                    timeLeft = Math.abs(remaining); updateDisplay(); persistState();
+                } else {
+                    isOvertime = false; timeDisplay.classList.remove('overtime-glow');
+                    if (schedule[currentStepIndex]?.type === 'work' && timeLeft > remaining) accumulatedStudyTime += (timeLeft - remaining);
+                    timeLeft = remaining; updateDisplay(); persistState();
+                }
+            }
+        }
+
+        function startTimer(skipBc = false) {
+            if (isRunning || currentStepIndex >= schedule.length) return; 
+            try { 
+                if (!fallbackCtx) fallbackCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (fallbackCtx.state === 'suspended') fallbackCtx.resume(); 
+                
+                const osc = fallbackCtx.createOscillator();
+                const gain = fallbackCtx.createGain();
+                gain.gain.value = 0;
+                osc.connect(gain);
+                gain.connect(fallbackCtx.destination);
+                osc.start(0);
+                osc.stop(0.001);
+            } catch(e){}
+            
+            isRunning = true; document.getElementById('start-btn').classList.add('hidden');
+            if(isOvertime) document.getElementById('complete-main-btn').classList.remove('hidden'); else document.getElementById('pause-btn').classList.remove('hidden');
+            
+            const currentSession = schedule[currentStepIndex];
+            if (lastPopupStep !== currentStepIndex && currentSession) {
+                lastPopupStep = currentStepIndex; clearTimeout(guidePopupTimeout);
+                document.getElementById('full-screen-guide-overlay').classList.add('hidden');
+                
+                if (currentSession.type === 'work') {
+                    document.getElementById('deep-guide-text').textContent = studyQuotes[Math.floor(Math.random() * studyQuotes.length)];
+                } else {
+                    document.getElementById('full-screen-guide-text').textContent = breakQuotes[Math.floor(Math.random() * breakQuotes.length)];
+                    document.getElementById('full-screen-guide-overlay').classList.remove('hidden');
+                    guidePopupTimeout = setTimeout(() => document.getElementById('full-screen-guide-overlay').classList.add('hidden'), 10000);
+                }
+            }
+
+            targetEndTime = isOvertime ? Date.now() - (timeLeft * 1000) : Date.now() + (timeLeft * 1000);
+            clearInterval(timerInterval); timerInterval = setInterval(timerCoreTick, 250); persistState(); if(!skipBc) broadcastToCloud();
+            
+            resetAutoDim(); // Start the 1 minute Auto-Dim countdown
+        }
+
+        function stopTimer(skipBc = false) {
+            if (!isRunning) return; isRunning = false; document.getElementById('start-btn').classList.remove('hidden'); document.getElementById('pause-btn').classList.add('hidden');
+            clearInterval(timerInterval); persistState(); if(!skipBc) broadcastToCloud();
+            clearTimeout(autoDimTimeout); // Stop the Auto-Dim countdown
+        }
+
+        let fallbackCtx = null, activeAlarmNodes = [];
+        function killActiveAlarms() { activeAlarmNodes.forEach(n => { try { n.stop(); n.disconnect(); } catch(e){} }); activeAlarmNodes = []; }
+        function playAlarmSound() {
+            try {
+                if (!fallbackCtx) fallbackCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (fallbackCtx.state === 'suspended') fallbackCtx.resume(); killActiveAlarms(); 
+                const isWork = schedule[currentStepIndex]?.type === 'work';
+                if (isWork) {
+                    for (let i = 0; i < 20; i++) setTimeout(() => { if(!isRunning && i > 2) return; 
+                        try { const osc = fallbackCtx.createOscillator(); const gain = fallbackCtx.createGain(); osc.connect(gain); gain.connect(fallbackCtx.destination); osc.type = 'square'; osc.frequency.setValueAtTime(880, fallbackCtx.currentTime); osc.frequency.setValueAtTime(660, fallbackCtx.currentTime + 0.1); gain.gain.setValueAtTime(0.6, fallbackCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, fallbackCtx.currentTime + 0.3); osc.start(fallbackCtx.currentTime); osc.stop(fallbackCtx.currentTime + 0.3); activeAlarmNodes.push(osc, gain); } catch(e){}
+                    }, i * 500);
+                } else {
+                    const notes = [523.25, 659.25, 783.99, 1046.50]; 
+                    for(let i=0; i<12; i++) setTimeout(() => { if(!isRunning && i > 2) return; 
+                        try { const osc = fallbackCtx.createOscillator(); const gain = fallbackCtx.createGain(); osc.connect(gain); gain.connect(fallbackCtx.destination); osc.type = 'sine'; osc.frequency.value = notes[i % notes.length]; gain.gain.setValueAtTime(0.4, fallbackCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, fallbackCtx.currentTime + 2.5); osc.start(fallbackCtx.currentTime); osc.stop(fallbackCtx.currentTime + 2.5); activeAlarmNodes.push(osc, gain); } catch(e){}
+                    }, i * 800);
+                }
+            } catch(e) {}
+        }
+
+        function flushSessionStats(isWorkComplete = false) {
+            let stats = JSON.parse(safeGet('pages_pomodoro_stats_v8', '{"history":{}}')); let today = getLocalTodayString();
+            if (!stats.history[today]) stats.history[today] = { mins: 0, sessions: 0 };
+            if (accumulatedStudyTime > 0) { stats.history[today].mins += Math.round(accumulatedStudyTime / 60); accumulatedStudyTime = 0; }
+            if (isWorkComplete && schedule[currentStepIndex]?.type === 'work') stats.history[today].sessions += 1;
+            safeSet('pages_pomodoro_stats_v8', JSON.stringify(stats)); renderStats();
+        }
+
+        function completeSession() {
+            stopTimer(); killActiveAlarms();
+            if (isOvertime && schedule[currentStepIndex]?.type === 'work') accumulatedStudyTime += timeLeft;
+            if (schedule[currentStepIndex]) schedule[currentStepIndex].status = 'completed'; 
+            safeSet('pages_pomodoro_schedule_v8', JSON.stringify(schedule));
+            flushSessionStats(schedule[currentStepIndex]?.type === 'work'); 
+            isOvertime = false; document.getElementById('complete-main-btn').classList.add('hidden'); timeDisplay.classList.remove('overtime-glow');
+            loadStep(currentStepIndex + 1); startTimer(); renderSchedule();
+        }
+
+        function jumpToStep(index) {
+            stopTimer(); killActiveAlarms(); 
+            document.getElementById('full-screen-guide-overlay').classList.add('hidden'); clearTimeout(guidePopupTimeout);
+            if (schedule[currentStepIndex] && schedule[currentStepIndex].status !== 'completed') { schedule[currentStepIndex].status = 'skipped'; safeSet('pages_pomodoro_schedule_v8', JSON.stringify(schedule)); }
+            accumulatedStudyTime = 0; 
+            flushSessionStats(false); isOvertime = false; document.getElementById('complete-main-btn').classList.add('hidden'); timeDisplay.classList.remove('overtime-glow');
+            loadStep(index); startTimer(); renderSchedule(); 
+        }
+
+        document.getElementById('start-btn').addEventListener('click', () => startTimer());
+        document.getElementById('pause-btn').addEventListener('click', () => stopTimer());
+        document.getElementById('skip-btn').addEventListener('click', () => { if(currentStepIndex < schedule.length) jumpToStep(currentStepIndex + 1); });
+        document.getElementById('undo-btn').addEventListener('click', () => { if(currentStepIndex > 0) jumpToStep(currentStepIndex - 1); });
+        document.getElementById('complete-main-btn').addEventListener('click', completeSession);
+        document.getElementById('close-guide-btn').addEventListener('click', () => { document.getElementById('full-screen-guide-overlay').classList.add('hidden'); clearTimeout(guidePopupTimeout); });
+
+        function updateDayTabs() {
+            document.querySelectorAll('.day-tab-btn').forEach(btn => {
+                if (parseInt(btn.getAttribute('data-day')) === activeTemplateDay) btn.className = "day-tab-btn flex-1 min-w-[40px] bg-blue-600 text-white text-[10px] px-2 py-2 rounded-lg font-bold shadow-md transition-all";
+                else btn.className = "day-tab-btn flex-1 min-w-[40px] bg-slate-800 text-slate-300 hover:bg-slate-700 text-[10px] px-2 py-2 rounded-lg font-bold transition-all";
+            });
+        }
+        
+        function saveTemplateInputs() {
+            const titleInputs = document.querySelectorAll('.session-title-input'); const durInputs = document.querySelectorAll('.session-dur-input');
+            if (titleInputs.length === weeklyTemplates[activeTemplateDay].length) {
+                titleInputs.forEach((input, i) => weeklyTemplates[activeTemplateDay][i].title = input.value);
+                durInputs.forEach((input, i) => weeklyTemplates[activeTemplateDay][i].duration = (parseInt(input.value) || 1) * 60);
+                safeSet('pages_pomodoro_weekly_v8', JSON.stringify(weeklyTemplates)); broadcastToCloud();
+            }
+        }
+
+        document.querySelectorAll('.day-tab-btn').forEach(btn => btn.addEventListener('click', (e) => { saveTemplateInputs(); activeTemplateDay = parseInt(e.target.getAttribute('data-day')); updateDayTabs(); populateSettingsList(); }));
+        document.querySelectorAll('.type-toggle-btn').forEach(btn => btn.addEventListener('click', (e) => { const val = e.currentTarget.getAttribute('data-val'); document.getElementById('new-sess-type').value = val; document.querySelectorAll('.type-toggle-btn').forEach(b => { if (b.getAttribute('data-val') === val) b.className = "type-toggle-btn flex-1 bg-blue-600 text-white text-xs px-2 rounded-md font-bold transition-all shadow-md"; else b.className = "type-toggle-btn flex-1 bg-transparent text-slate-400 text-xs px-2 rounded-md font-bold transition-all"; }); }));
+
+        window.templateDelete = function(index) { saveTemplateInputs(); weeklyTemplates[activeTemplateDay].splice(index, 1); safeSet('pages_pomodoro_weekly_v8', JSON.stringify(weeklyTemplates)); populateSettingsList(); broadcastToCloud(); }
+
+        function populateSettingsList() {
+            const list = document.getElementById('settings-list'); if(!list) return; list.innerHTML = '';
+            let currentPlan = weeklyTemplates[activeTemplateDay] || [];
+            if (currentPlan.length === 0) { list.innerHTML = `<p class="text-slate-500 text-xs italic p-2 text-center">Plan is empty for this day.</p>`; return; }
+            currentPlan.forEach((item, index) => {
+                const row = document.createElement('div'); row.className = "flex items-center gap-2 bg-slate-950 p-2 rounded-xl border border-slate-800";
+                row.innerHTML = `<span class="text-[10px] font-mono text-slate-500 w-4">${index + 1}</span>
+                    <input type="text" value="${item.title}" class="session-title-input flex-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none" onchange="saveTemplateInputs()">
+                    <input type="number" value="${Math.round(item.duration / 60)}" class="session-dur-input w-12 bg-slate-900 border border-slate-700 rounded-lg px-1 py-1.5 text-xs text-white text-center focus:outline-none" onchange="saveTemplateInputs()">
+                    <button onclick="templateDelete(${index})" class="text-red-500 bg-slate-800 px-2 py-1.5 rounded-lg border border-slate-700 text-xs">🗑️</button>`;
+                list.appendChild(row);
+            });
+        }
+
+        document.getElementById('add-sess-btn').addEventListener('click', () => {
+            saveTemplateInputs();
+            const titleInput = document.getElementById('new-sess-title'); const durInput = document.getElementById('new-sess-dur'); const typeInput = document.getElementById('new-sess-type');
+            const title = titleInput.value.trim() || (typeInput.value === 'work' ? "Study Block" : "Break Block");
+            const durationMins = parseInt(durInput.value) || (typeInput.value === 'work' ? 50 : 10);
+            weeklyTemplates[activeTemplateDay].push({ id: Date.now(), type: typeInput.value, title: title, duration: durationMins * 60 });
+            safeSet('pages_pomodoro_weekly_v8', JSON.stringify(weeklyTemplates));
+            titleInput.value = ''; durInput.value = ''; populateSettingsList(); broadcastToCloud();
+        });
+
+        document.getElementById('load-day-btn').addEventListener('click', () => {
+            stopTimer(); killActiveAlarms();
+            schedule = JSON.parse(JSON.stringify(weeklyTemplates[activeTemplateDay]));
+            schedule.forEach(s => delete s.status); safeSet('pages_pomodoro_schedule_v8', JSON.stringify(schedule));
+            currentStepIndex = 0; accumulatedStudyTime = 0; isOvertime = false; loadStep(0, false); renderSchedule(); broadcastToCloud();
+            showToast("Protocol Loaded & Restarted"); switchPage('page-timer');
+        });
+
+        let activeTaskTab = 'backlog'; let activeTaskSubj = 'Physics';
+        document.querySelectorAll('.task-tab').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                activeTaskTab = e.currentTarget.getAttribute('data-tab');
+                document.querySelectorAll('.task-tab').forEach(t => t.className = "task-tab flex-1 min-w-[70px] bg-transparent text-slate-400 font-bold py-2 px-2 rounded-lg text-xs transition-all");
+                let colorClass = "bg-purple-600 text-white shadow-md";
+                if (activeTaskTab === 'revision') colorClass = "bg-amber-600 text-white shadow-md";
+                else if (activeTaskTab === 'mcq' || activeTaskTab === 'matrix') colorClass = "bg-blue-600 text-white shadow-md";
+                e.currentTarget.className = `task-tab flex-1 min-w-[70px] ${colorClass} font-bold py-2 px-2 rounded-lg text-xs transition-all`;
+                
+                const tf = document.getElementById('task-add-form'), mf = document.getElementById('mcq-add-form'), sf = document.getElementById('subject-filter-container');
+                if (activeTaskTab === 'matrix') { tf.classList.add('hidden'); mf.classList.add('hidden'); sf.classList.add('hidden'); }
+                else if (activeTaskTab === 'mcq') { tf.classList.add('hidden'); mf.classList.remove('hidden'); sf.classList.remove('hidden'); document.getElementById('mcq-subject-title').textContent = `${activeTaskSubj} Daily Target`; loadMCQInputs(); }
+                else { tf.classList.remove('hidden'); mf.classList.add('hidden'); sf.classList.remove('hidden'); }
+                renderTasks(activeTaskTab);
+            });
+        });
+
+        document.querySelectorAll('.subj-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                activeTaskSubj = e.currentTarget.getAttribute('data-subj'); document.getElementById('active-subject-input').value = activeTaskSubj;
+                document.querySelectorAll('.subj-btn').forEach(b => b.className = "subj-btn flex-1 bg-slate-900 text-slate-400 border border-slate-800 font-bold py-2 rounded-lg text-xs transition-all");
+                e.currentTarget.className = "subj-btn active flex-1 bg-slate-700 text-white border border-slate-600 font-bold py-2 rounded-lg text-xs transition-all shadow-sm";
+                if(activeTaskTab === 'mcq') { document.getElementById('mcq-subject-title').textContent = `${activeTaskSubj} Daily Target`; loadMCQInputs(); }
+                renderTasks(activeTaskTab);
+            });
+        });
+
+        document.getElementById('add-task-btn').addEventListener('click', () => {
+            const titleInput = document.getElementById('task-title-input'); const title = titleInput.value.trim(); if (!title) return;
+            let tasks = JSON.parse(safeGet('pages_pomodoro_tasks_v8', '[]'));
+            tasks.push({ id: Date.now(), title, subject: activeTaskSubj, type: activeTaskTab, completed: false });
+            safeSet('pages_pomodoro_tasks_v8', JSON.stringify(tasks)); titleInput.value = ''; renderTasks(activeTaskTab); broadcastToCloud();
+        });
+
+        window.toggleTask = function(id) {
+            let tasks = JSON.parse(safeGet('pages_pomodoro_tasks_v8', '[]')); let t = tasks.find(x => x.id === id);
+            if (t) { t.completed = !t.completed; safeSet('pages_pomodoro_tasks_v8', JSON.stringify(tasks)); renderTasks(activeTaskTab); broadcastToCloud(); }
+        };
+        window.deleteTask = function(id) { let tasks = JSON.parse(safeGet('pages_pomodoro_tasks_v8', '[]')); tasks = tasks.filter(x => x.id !== id); safeSet('pages_pomodoro_tasks_v8', JSON.stringify(tasks)); renderTasks(activeTaskTab); broadcastToCloud(); };
+
+        function loadMCQInputs() {
+            let mcqs = JSON.parse(safeGet('pages_pomodoro_mcq_v8', '{}')); let today = getLocalTodayString();
+            let d = mcqs[today] && mcqs[today][activeTaskSubj] ? mcqs[today][activeTaskSubj] : {t:0, a:0, c:0};
+            document.getElementById('mcq-target').value = d.t || ''; document.getElementById('mcq-attempted').value = d.a || ''; document.getElementById('mcq-correct').value = d.c || '';
+            updateMCQMath();
+        }
+        function updateMCQMath() {
+            let t = parseInt(document.getElementById('mcq-target').value) || 0; let a = parseInt(document.getElementById('mcq-attempted').value) || 0; let c = parseInt(document.getElementById('mcq-correct').value) || 0;
+            document.getElementById('mcq-display-incorrect').textContent = Math.max(0, a - c); document.getElementById('mcq-display-left').textContent = Math.max(0, t - a);
+        }
+        ['mcq-target', 'mcq-attempted', 'mcq-correct'].forEach(id => document.getElementById(id).addEventListener('input', updateMCQMath));
+        document.getElementById('save-mcq-btn').addEventListener('click', () => {
+            let mcqs = JSON.parse(safeGet('pages_pomodoro_mcq_v8', '{}')); let today = getLocalTodayString(); if(!mcqs[today]) mcqs[today] = {};
+            mcqs[today][activeTaskSubj] = { t: parseInt(document.getElementById('mcq-target').value)||0, a: parseInt(document.getElementById('mcq-attempted').value)||0, c: parseInt(document.getElementById('mcq-correct').value)||0 };
+            safeSet('pages_pomodoro_mcq_v8', JSON.stringify(mcqs)); showToast("Saved"); broadcastToCloud();
+        });
+
+        function renderTasks(tab) {
+            const container = document.getElementById('vault-list-container'); if(!container) return; container.innerHTML = '';
+            if (tab === 'matrix') {
+                let tasks = JSON.parse(safeGet('pages_pomodoro_tasks_v8', '[]')); let mcqs = JSON.parse(safeGet('pages_pomodoro_mcq_v8', '{}')); let today = getLocalTodayString();
+                ['Physics', 'Chemistry', 'Biology'].forEach(subj => {
+                    let subT = tasks.filter(t => t.subject === subj); let bTot = subT.filter(t => t.type === 'backlog').length; let bDone = subT.filter(t => t.type === 'backlog' && t.completed).length; let rTot = subT.filter(t => t.type === 'revision').length; let rDone = subT.filter(t => t.type === 'revision' && t.completed).length;
+                    let mData = mcqs[today] && mcqs[today][subj] ? mcqs[today][subj] : {t:0, a:0, c:0}; let mLeft = Math.max(0, mData.t - mData.a); let mInc = Math.max(0, mData.a - mData.c);
+                    container.innerHTML += `<div class="bg-slate-900 border border-slate-800 rounded-xl p-4 mb-2"><h4 class="text-xs font-bold text-white mb-2 uppercase tracking-widest">${subj}</h4><div class="grid grid-cols-2 gap-2 text-center mb-2"><div class="bg-slate-950 rounded-lg p-2"><p class="text-[9px] text-slate-400 uppercase tracking-wider mb-0.5">Backlogs Left</p><p class="text-sm font-bold">${bTot - bDone}</p></div><div class="bg-slate-950 rounded-lg p-2"><p class="text-[9px] text-slate-400 uppercase tracking-wider mb-0.5">Revision Left</p><p class="text-sm font-bold">${rTot - rDone}</p></div></div><div class="bg-slate-950 rounded-lg p-2 text-center flex justify-between"><div class="text-[8px] text-slate-400 uppercase">Tar<br><b class="text-xs text-white">${mData.t}</b></div><div class="text-[8px] text-slate-400 uppercase">Att<br><b class="text-xs text-blue-400">${mData.a}</b></div><div class="text-[8px] text-slate-400 uppercase">Cor<br><b class="text-xs text-emerald-400">${mData.c}</b></div><div class="text-[8px] text-slate-400 uppercase">Wr<br><b class="text-xs text-tomato">${mInc}</b></div></div></div>`;
+                }); return;
+            }
+            if (tab === 'mcq') return;
+            let tasks = JSON.parse(safeGet('pages_pomodoro_tasks_v8', '[]')).filter(t => t.type === tab && t.subject === activeTaskSubj);
+            if (tasks.length === 0) { container.innerHTML = `<p class="text-slate-500 italic p-4 text-xs text-center">No tasks found. Add above.</p>`; return; }
+            tasks.forEach(task => {
+                const div = document.createElement('div'); div.className = `flex justify-between items-center p-3 rounded-xl border ${task.completed ? 'bg-slate-950 border-slate-900 opacity-50' : 'bg-slate-900 border-slate-800'}`;
+                div.innerHTML = `<div class="flex items-center gap-3 min-w-0 flex-1"><button onclick="toggleTask(${task.id})" class="w-5 h-5 rounded-md border flex items-center justify-center shrink-0 ${task.completed ? 'bg-emerald-600 border-emerald-500 text-white' : 'border-slate-700 bg-slate-950'}">${task.completed ? '✓' : ''}</button><span class="text-xs font-medium truncate ${task.completed ? 'line-through text-slate-500' : 'text-slate-200'}">${task.title}</span></div><button onclick="deleteTask(${task.id})" class="text-red-500 ml-2 text-xs">🗑️</button>`;
+                container.appendChild(div);
+            });
+        }
+
+        function renderStats() {
+            const stats = JSON.parse(safeGet('pages_pomodoro_stats_v8', '{"history":{}}')); const todayData = stats.history[getLocalTodayString()] || { mins: 0, sessions: 0 };
+            document.getElementById('stat-today-mins').innerHTML = `${todayData.mins}<span class="text-sm text-slate-500 ml-1">m</span>`; document.getElementById('stat-today-sessions').textContent = todayData.sessions;
+            let weekMins = 0; for(let i=0; i<7; i++) { let d = new Date(); d.setDate(d.getDate()-i); let ds = d.toISOString().split('T')[0]; if(stats.history[ds]) weekMins += stats.history[ds].mins; }
+            document.getElementById('stat-weekly-total').textContent = `${weekMins}m`;
+        }
+
+        document.getElementById('factory-reset-btn').addEventListener('click', async (e) => { 
+            if(confirm("DANGER: Delete ALL data from this device AND the Cloud Room?")) { 
+                e.target.textContent = "⏳ Wiping System...";
+                
+                if (currentSyncRoom) {
+                    try {
+                        const roomDoc = db.collection('artifacts').doc('neettimercloud').collection('public').doc('data').collection('sync_rooms').doc(currentSyncRoom);
+                        await roomDoc.delete();
+                    } catch(err) { }
+                }
+                
+                const keys = []; 
+                for (let i = 0; i < localStorage.length; i++) {
+                    if (localStorage.key(i).startsWith('pages_pomodoro_')) keys.push(localStorage.key(i));
+                }
+                keys.forEach(k => localStorage.removeItem(k)); 
+                
+                window.location.reload(); 
+            } 
+        });
+
+        let savedStateRaw = safeGet('pages_pomodoro_app_state_v8', null);
+        if (savedStateRaw && schedule.length > 0) {
+            try {
+                let savedState = JSON.parse(savedStateRaw); currentStepIndex = savedState.currentStepIndex || 0; targetEndTime = savedState.targetEndTime || 0; accumulatedStudyTime = savedState.accumulatedStudyTime || 0; isOvertime = savedState.isOvertime || false; loadStep(currentStepIndex, true); 
+                if (savedState.isRunning) { if (isOvertime) { timeLeft = Math.abs(Math.round((targetEndTime - Date.now())/1000)); updateDisplay(); startTimer(); } else { let rem = Math.round((savedState.targetEndTime - Date.now())/1000); if (rem > 0) { timeLeft = rem; updateDisplay(); startTimer(); } else { isOvertime = true; timeLeft = Math.abs(rem); updateDisplay(); startTimer(); } } } 
+                else { timeLeft = savedState.timeLeft !== undefined ? savedState.timeLeft : (schedule[currentStepIndex] ? schedule[currentStepIndex].duration : 0); if(isOvertime) document.getElementById('complete-main-btn').classList.remove('hidden'); updateDisplay(); }
+            } catch(e) { loadStep(0); }
+        } else {
+            loadStep(0); 
+        }
+        
+        updateDayTabs(); populateSettingsList();
+    </script>
+</body>
+</html>
