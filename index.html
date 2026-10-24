@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#020617">
-    <title>DeenTimeR-balance your life </title>
+    <title>DeenTimeR — Balance Your Life</title>
 
     <!-- App Icon (Embedded SVG Data URI for APK / Home Screen) -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='28' fill='%23020617'/%3E%3Ccircle cx='60' cy='64' r='38' fill='none' stroke='%233b82f6' stroke-width='8'/%3E%3Cpath d='M60 42v22l14 10' fill='none' stroke='%23ff4757' stroke-width='8' stroke-linecap='round'/%3E%3Crect x='48' y='14' width='24' height='8' rx='4' fill='%233b82f6'/%3E%3C/svg%3E">
@@ -40,7 +40,8 @@
             };
         }
     </script>
-<style>
+
+    <style>
         /* ================= CORE RESET & 100% OFFLINE CSS ENGINE ================= */
         *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         html, body {
@@ -66,8 +67,10 @@
         .justify-between { justify-content: space-between; }
         .justify-around { justify-content: space-around; }
         .grid { display: grid; }
+        .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
         .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
         .grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
         .grid-cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
         .grid-cols-7 { grid-template-columns: repeat(7, minmax(0, 1fr)); }
@@ -133,6 +136,21 @@
         .text-purple-400 { color: #c084fc; }
         .text-red-400 { color: #f87171; }
         .border { border-width: 1px; border-style: solid; border-color: #1e293b; }
+
+        /* RPG Card Glow & To-Do Grid Mode */
+        .rpg-card-glow {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(2, 6, 23, 0.98));
+            border: 1px solid rgba(59, 130, 246, 0.45);
+            box-shadow: 0 0 28px rgba(59, 130, 246, 0.18), inset 0 0 15px rgba(16, 185, 129, 0.08);
+        }
+        .todo-grid-mode {
+            display: grid !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 0.65rem !important;
+        }
+        @media (max-width: 380px) {
+            .todo-grid-mode { grid-template-columns: repeat(1, minmax(0, 1fr)) !important; }
+        }
 
         /* Scroll & Page Containers */
         .native-scroll {
@@ -243,56 +261,26 @@
 
         /* ================= LAPTOP & DESKTOP PRO SCALING ENGINE ================= */
         @media (min-width: 768px) and (min-height: 641px) {
-            html {
-                font-size: 18px; /* Scales up all rem-based fonts, buttons, and spacing */
-            }
-            .app-page {
-                padding: 1.75rem 2.5rem;
-                padding-bottom: 7rem;
-            }
-            #timer-container, .max-w-4xl {
-                max-width: 74rem !important;
-            }
-            .max-w-2xl {
-                max-width: 58rem !important;
-            }
-            /* Boost micro-text classes so they are crisp and readable on laptop screens */
-            .text-\[8px\], .text-\[9px\], .text-\[10px\] {
-                font-size: 0.78rem !important;
-                line-height: 1.25 !important;
-            }
-            .text-\[11px\], .text-xs {
-                font-size: 0.88rem !important;
-                line-height: 1.35 !important;
-            }
-            .text-sm {
-                font-size: 1rem !important;
-            }
-            #header-goal-name {
-                max-width: 220px !important;
-            }
-            /* Scale up Bottom Nav & Icons for Desktop */
+            html { font-size: 18px; }
+            .app-page { padding: 1.75rem 2.5rem; padding-bottom: 7rem; }
+            #timer-container, .max-w-4xl { max-width: 74rem !important; }
+            .max-w-2xl { max-width: 58rem !important; }
+            .text-\[8px\], .text-\[9px\], .text-\[10px\] { font-size: 0.78rem !important; line-height: 1.25 !important; }
+            .text-\[11px\], .text-xs { font-size: 0.88rem !important; line-height: 1.35 !important; }
+            .text-sm { font-size: 1rem !important; }
+            #header-goal-name { max-width: 220px !important; }
             .bottom-nav {
-                height: 4.8rem;
-                max-width: 48rem;
-                left: 50%;
-                transform: translateX(-50%);
+                height: 4.8rem; max-width: 48rem; left: 50%; transform: translateX(-50%);
                 border-radius: 1.5rem 1.5rem 0 0;
                 border-left: 1px solid rgba(255, 255, 255, 0.1);
                 border-right: 1px solid rgba(255, 255, 255, 0.1);
             }
-            .bottom-nav .nav-btn {
-                width: 6rem !important;
-            }
-            .bottom-nav .nav-icon {
-                font-size: 1.55rem !important;
-            }
+            .bottom-nav .nav-btn { width: 6rem !important; }
+            .bottom-nav .nav-icon { font-size: 1.55rem !important; }
         }
 
         @media (min-width: 960px) and (min-height: 641px) {
-            html {
-                font-size: 19.5px; /* Extra crisp desktop scaling */
-            }
+            html { font-size: 19.5px; }
             .timer-cockpit-grid {
                 flex-direction: row !important;
                 align-items: center !important;
@@ -302,43 +290,16 @@
                 margin-top: 0.75rem;
             }
             .cockpit-left {
-                flex: 1 1 50%;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                background: rgba(15, 23, 42, 0.45);
-                border: 1px solid rgba(51, 65, 85, 0.5);
-                border-radius: 2rem;
-                padding: 2.25rem 1.5rem;
+                flex: 1 1 50%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+                background: rgba(15, 23, 42, 0.45); border: 1px solid rgba(51, 65, 85, 0.5);
+                border-radius: 2rem; padding: 2.25rem 1.5rem;
             }
-            .cockpit-right {
-                flex: 1 1 50%;
-                display: flex;
-                flex-direction: column;
-                gap: 1.1rem !important;
-            }
-            #time-display {
-                font-size: 7.8rem !important;
-                line-height: 0.92 !important;
-            }
-            #session-type {
-                font-size: 1.15rem !important;
-                margin-top: 1rem !important;
-            }
-            /* Larger Transport Buttons & Icons on Laptop */
-            #controls-container svg {
-                width: 2rem !important;
-                height: 2rem !important;
-            }
-            #start-btn svg, #pause-btn svg, #complete-main-btn svg {
-                width: 2.6rem !important;
-                height: 2.6rem !important;
-            }
-            #anim-study svg, #anim-break svg {
-                width: 4.2rem !important;
-                height: 4.2rem !important;
-            }
+            .cockpit-right { flex: 1 1 50%; display: flex; flex-direction: column; gap: 1.1rem !important; }
+            #time-display { font-size: 7.8rem !important; line-height: 0.92 !important; }
+            #session-type { font-size: 1.15rem !important; margin-top: 1rem !important; }
+            #controls-container svg { width: 2rem !important; height: 2rem !important; }
+            #start-btn svg, #pause-btn svg, #complete-main-btn svg { width: 2.6rem !important; height: 2.6rem !important; }
+            #anim-study svg, #anim-break svg { width: 4.2rem !important; height: 4.2rem !important; }
         }
 
         /* Microsoft To Do Checkbox Animation */
@@ -373,21 +334,35 @@
         <div id="page-timer" class="app-page active-page native-scroll bg-gradient-to-b from-[#0a0f1d] to-[#020617]">
             <div id="timer-container" class="w-full max-w-4xl flex flex-col items-center relative">
 
-                <!-- Top Header Bar: Dim Mode Toggle + App Title + Main Goal Quick Pill -->
-                <div id="app-header-brand" class="w-full flex items-center justify-between mb-3 gap-2">
-                    <button id="dim-toggle-btn" class="bg-slate-800/80 hover:bg-slate-700 text-amber-300 px-3 py-2 rounded-xl border border-slate-700/70 text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-all shadow-sm" title="Toggle Power-Saving OLED Dim Mode">
-                        <span>🌙</span><span class="hidden sm:inline">Dim Mode</span>
-                    </button>
-
-                    <div class="text-center flex flex-col items-center">
-                        <h1 class="text-2xl sm:text-4xl font-stylish tracking-wide text-blue-400 drop-shadow-[0_0_12px_rgba(59,130,246,0.5)] m-0 leading-none">Pomo</h1>
-                        <div id="current-phase-display" class="mt-1.5 bg-blue-500/10 px-4 py-0.5 rounded-full text-[10px] font-bold text-blue-400 border border-blue-500/20 uppercase tracking-widest font-phase">Ready to Start</div>
+                <!-- Top Header Bar: Dim Mode + Screen Always ON/OFF Toggle + Title + RPG Badge + Main Goal Pill -->
+                <div id="app-header-brand" class="w-full flex items-center justify-between mb-3 gap-1.5">
+                    <div class="flex items-center gap-1.5">
+                        <button id="dim-toggle-btn" class="bg-slate-800/80 hover:bg-slate-700 text-amber-300 px-2.5 py-2 rounded-xl border border-slate-700/70 text-xs font-bold flex items-center gap-1 active:scale-95 transition-all shadow-sm" title="Toggle Power-Saving OLED Dim Mode">
+                            <span>🌙</span><span class="hidden sm:inline">Dim</span>
+                        </button>
+                        <button id="screen-wake-toggle-btn" class="bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 px-2.5 py-2 rounded-xl border border-emerald-500/40 text-xs font-bold flex items-center gap-1 active:scale-95 transition-all shadow-sm" title="Toggle Screen Always ON or Normal Sleep">
+                            <span id="screen-wake-icon">🔆</span><span id="screen-wake-label" class="text-[10px]">Screen ON</span>
+                        </button>
                     </div>
 
-                    <button id="header-goal-pill" class="bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 px-2.5 py-1.5 rounded-xl flex flex-col items-end active:scale-95 transition-all" title="Open Life Compass & Goals">
-                        <span id="header-goal-name" class="text-[9px] font-bold uppercase tracking-wider text-slate-400 truncate max-w-[95px]">🎯 Cracking NEET</span>
-                        <span id="header-goal-days" class="text-xs font-extrabold font-mono text-emerald-400">210d left</span>
-                    </button>
+                    <div class="text-center flex flex-col items-center">
+                        <h1 class="text-2xl sm:text-4xl font-stylish tracking-wide text-blue-400 drop-shadow-[0_0_12px_rgba(59,130,246,0.5)] m-0 leading-none">DeenTimeR</h1>
+                        <div id="current-phase-display" class="mt-1.5 bg-blue-500/10 px-3.5 py-0.5 rounded-full text-[10px] font-bold text-blue-400 border border-blue-500/20 uppercase tracking-widest font-phase">Ready to Start</div>
+                    </div>
+
+                    <div class="flex items-center gap-1.5">
+                        <!-- Top RPG Badge Pill (Opens RPG Arena) -->
+                        <button id="top-rpg-pill" class="bg-slate-900/90 hover:bg-slate-800 border border-blue-500/40 px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 active:scale-95 transition-all" title="Open RPG World Ranking Arena">
+                            <span id="top-rpg-badge-icon" class="text-sm">🪨</span>
+                            <span id="top-rpg-lv-text" class="text-xs font-extrabold font-mono text-blue-400">Lv.0</span>
+                        </button>
+
+                        <!-- Main Goal Countdown Pill -->
+                        <button id="header-goal-pill" class="bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 px-2.5 py-1.5 rounded-xl flex flex-col items-end active:scale-95 transition-all" title="Open Life Compass & Goals">
+                            <span id="header-goal-name" class="text-[9px] font-bold uppercase tracking-wider text-slate-400 truncate max-w-[85px]">🎯 Cracking NEET</span>
+                            <span id="header-goal-days" class="text-xs font-extrabold font-mono text-emerald-400">210d left</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- DRIFT / SALAH WARNING BANNER -->
@@ -610,22 +585,76 @@
         </div>
 
         <!-- ===================================================================== -->
-        <!-- PAGE 3: MICROSOFT TO DO (WITH CUSTOM REPEATING & IN-APP DATE PICKER)  -->
+        <!-- PAGE 3: MICROSOFT TO DO (GRID VIEW + PROTOCOL RUN + 6M ANALYTICS)     -->
         <!-- ===================================================================== -->
         <div id="page-todo" class="app-page native-scroll bg-[#020617]">
             <div class="w-full max-w-2xl flex flex-col">
 
                 <!-- To Do Header -->
-                <div class="flex justify-between items-start mb-3 pb-2 border-b border-slate-800">
+                <div class="flex flex-wrap justify-between items-start gap-2 mb-3 pb-2 border-b border-slate-800">
                     <div>
                         <h2 id="todo-header-title" class="text-xl font-extrabold text-white flex items-center gap-2">☀️ My Day</h2>
                         <p id="todo-header-date" class="text-xs text-slate-400 mt-0.5">Today</p>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <button id="todo-suggestions-btn" class="bg-amber-500/15 text-amber-300 border border-amber-500/30 text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5 active:scale-95">
-                            <span>💡</span> Suggestions <span id="todo-sugg-badge" class="bg-amber-500 text-slate-950 text-[10px] font-extrabold px-1.5 rounded-full">0</span>
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <button id="todo-analytics-toggle-btn" class="bg-blue-500/15 text-blue-300 border border-blue-500/30 text-xs font-bold px-2.5 py-1.5 rounded-xl flex items-center gap-1 active:scale-95">
+                            <span>📊</span> Analytics
+                        </button>
+                        <button id="todo-view-mode-btn" class="bg-slate-800 text-slate-200 border border-slate-700 text-xs font-bold px-2.5 py-1.5 rounded-xl flex items-center gap-1 active:scale-95" title="Switch Grid or List View">
+                            <span id="todo-view-mode-icon">🔲</span> <span id="todo-view-mode-text">Grid</span>
+                        </button>
+                        <button id="todo-suggestions-btn" class="bg-amber-500/15 text-amber-300 border border-amber-500/30 text-xs font-bold px-2.5 py-1.5 rounded-xl flex items-center gap-1 active:scale-95">
+                            <span>💡</span> <span id="todo-sugg-badge" class="bg-amber-500 text-slate-950 text-[10px] font-extrabold px-1.5 rounded-full">0</span>
                         </button>
                         <button id="delete-custom-list-btn" class="hidden bg-red-900/30 text-red-400 border border-red-800/50 text-xs font-bold px-2.5 py-1.5 rounded-xl active:scale-95">🗑️</button>
+                    </div>
+                </div>
+
+                <!-- TO-DO PROGRESSION & DATA ANALYSIS HISTORY DRAWER (1W, 4W, PREV 4W, 6M + LINE GRAPH) -->
+                <div id="todo-analytics-panel" class="hidden bg-slate-900/95 border border-blue-500/40 rounded-2xl p-4 mb-4 flex-col gap-3 shadow-xl">
+                    <div class="flex flex-wrap justify-between items-center gap-2 border-b border-slate-800 pb-2">
+                        <div>
+                            <h3 class="text-xs font-extrabold uppercase tracking-wider text-blue-400">📈 To-Do Progression & Data Analysis History</h3>
+                            <p class="text-[10px] text-slate-400">Tracks completed tasks, completion velocity & 6-month trajectory</p>
+                        </div>
+                        <div class="flex gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                            <button type="button" class="todo-graph-range-btn bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg" data-range="7d">1 Week</button>
+                            <button type="button" class="todo-graph-range-btn text-slate-400 text-[10px] font-bold px-2.5 py-1 rounded-lg" data-range="4w">4 Weeks</button>
+                            <button type="button" class="todo-graph-range-btn text-slate-400 text-[10px] font-bold px-2.5 py-1 rounded-lg" data-range="6m">6 Months</button>
+                        </div>
+                    </div>
+
+                    <!-- 4 Progression Metric Cards -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+                        <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5">
+                            <p class="text-[9px] font-bold uppercase text-slate-400">1-Week Progress</p>
+                            <p id="todo-stat-1w" class="text-base font-mono font-extrabold text-emerald-400 mt-0.5">0</p>
+                            <p id="todo-stat-1w-sub" class="text-[9px] text-slate-500">Last 7 Days</p>
+                        </div>
+                        <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5">
+                            <p class="text-[9px] font-bold uppercase text-slate-400">4-Week Progress</p>
+                            <p id="todo-stat-4w" class="text-base font-mono font-extrabold text-blue-400 mt-0.5">0</p>
+                            <p id="todo-stat-4w-sub" class="text-[9px] text-slate-500">Days 1–28</p>
+                        </div>
+                        <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5">
+                            <p class="text-[9px] font-bold uppercase text-slate-400">Earlier 4-Week</p>
+                            <p id="todo-stat-prev4w" class="text-base font-mono font-extrabold text-purple-400 mt-0.5">0</p>
+                            <p id="todo-stat-prev4w-sub" class="text-[9px] text-slate-500">Days 29–56</p>
+                        </div>
+                        <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5">
+                            <p class="text-[9px] font-bold uppercase text-slate-400">6-Month Total</p>
+                            <p id="todo-stat-6m" class="text-base font-mono font-extrabold text-amber-400 mt-0.5">0</p>
+                            <p id="todo-stat-6m-sub" class="text-[9px] text-slate-500">180-Day History</p>
+                        </div>
+                    </div>
+
+                    <!-- Interactive SVG Line Graph -->
+                    <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex flex-col gap-1.5">
+                        <div class="flex justify-between items-center">
+                            <span id="todo-graph-title" class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Completion Trend Line Graph</span>
+                            <span id="todo-graph-delta-badge" class="text-[10px] font-mono font-bold text-emerald-400">+0% vs prior period</span>
+                        </div>
+                        <div id="todo-line-graph-box" class="w-full h-36 flex items-center justify-center"></div>
                     </div>
                 </div>
 
@@ -655,7 +684,7 @@
                     </div>
                 </div>
 
-                <!-- Active Tasks List -->
+                <!-- Active Tasks List (Supports List or Grid View) -->
                 <div id="todo-active-container" class="flex flex-col gap-2 mb-4"></div>
 
                 <!-- Completed Tasks Collapsible Section -->
@@ -673,15 +702,16 @@
         </div>
 
         <!-- ===================================================================== -->
-        <!-- PAGE 4: COMPASS & VAULT (3-TIER GOALS + NEET VAULT)                   -->
+        <!-- PAGE 4: COMPASS, STUDY VAULT & RPG ARENA                              -->
         <!-- ===================================================================== -->
         <div id="page-vault" class="app-page native-scroll bg-[#020617]">
             <div class="w-full max-w-2xl flex flex-col">
 
-                <!-- Top Mode Switcher -->
-                <div class="flex gap-2 mb-3 bg-slate-900 p-1 rounded-xl border border-slate-800 shrink-0">
-                    <button id="mode-compass-btn" class="flex-1 bg-emerald-600 text-white font-bold py-2 rounded-lg text-xs shadow-md transition-all">🧭 Life Compass & Goals</button>
-                    <button id="mode-neet-vault-btn" class="flex-1 bg-transparent text-slate-400 font-bold py-2 rounded-lg text-xs transition-all">📚 NEET Study Vault</button>
+                <!-- Top Mode Switcher (3 Modes: Life Compass | Study Vault | RPG Arena) -->
+                <div class="flex gap-1.5 mb-3 bg-slate-900 p-1 rounded-xl border border-slate-800 shrink-0">
+                    <button id="mode-compass-btn" class="flex-1 bg-emerald-600 text-white font-bold py-2 rounded-lg text-xs shadow-md transition-all">🧭 Compass</button>
+                    <button id="mode-neet-vault-btn" class="flex-1 bg-transparent text-slate-400 font-bold py-2 rounded-lg text-xs transition-all">📚 Study Vault</button>
+                    <button id="mode-rpg-arena-btn" class="flex-1 bg-transparent text-slate-400 font-bold py-2 rounded-lg text-xs transition-all">⚔️ RPG Arena</button>
                 </div>
 
                 <!-- SUB-VIEW A: 3-TIER LIFE COMPASS -->
@@ -755,25 +785,26 @@
 
                 </div>
 
-                <!-- SUB-VIEW B: EXISTING NEET VAULT -->
+                <!-- SUB-VIEW B: STUDY VAULT (INTEGRATED WITH LIVE PROTOCOL, TIMER & COMPLETED SECTION) -->
                 <div id="neet-vault-subview" class="hidden flex-col">
-                    <div class="flex gap-2 mb-4 bg-slate-900 p-1 rounded-xl border border-slate-800 overflow-x-auto no-scrollbar shrink-0" id="task-tabs">
+                    <div class="flex gap-2 mb-3 bg-slate-900 p-1 rounded-xl border border-slate-800 overflow-x-auto no-scrollbar shrink-0" id="task-tabs">
                         <button class="task-tab flex-1 min-w-[70px] bg-purple-600 text-white font-bold py-2 px-2 rounded-lg text-xs shadow-md transition-all" data-tab="backlog">Backlog</button>
                         <button class="task-tab flex-1 min-w-[70px] bg-transparent text-slate-400 font-bold py-2 px-2 rounded-lg text-xs transition-all" data-tab="revision">Revision</button>
                         <button class="task-tab flex-1 min-w-[70px] bg-transparent text-slate-400 font-bold py-2 px-2 rounded-lg text-xs transition-all" data-tab="mcq">Daily MCQ</button>
                         <button class="task-tab flex-1 min-w-[70px] bg-transparent text-slate-400 font-bold py-2 px-2 rounded-lg text-xs transition-all" data-tab="matrix">Matrix</button>
                     </div>
 
-                    <div id="subject-filter-container" class="flex gap-2 mb-4 shrink-0">
+                    <!-- Dynamic Subject Bar -->
+                    <div id="subject-filter-container" class="flex gap-1.5 overflow-x-auto no-scrollbar mb-3 pb-1 shrink-0">
                         <input type="hidden" id="active-subject-input" value="Physics">
-                        <button class="subj-btn active flex-1 bg-slate-700 text-white border border-slate-600 font-bold py-2 rounded-lg text-xs transition-all shadow-sm" data-subj="Physics">Physics</button>
-                        <button class="subj-btn flex-1 bg-slate-900 text-slate-400 border border-slate-800 font-bold py-2 rounded-lg text-xs transition-all" data-subj="Chemistry">Chem</button>
-                        <button class="subj-btn flex-1 bg-slate-900 text-slate-400 border border-slate-800 font-bold py-2 rounded-lg text-xs transition-all" data-subj="Biology">Biology</button>
                     </div>
 
                     <div id="task-add-form" class="flex flex-col gap-2 mb-4 shrink-0 bg-slate-900 p-3 rounded-xl border border-slate-800">
-                        <input type="text" id="task-title-input" placeholder="Chapter name or topic..." class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none">
-                        <button id="add-task-btn" class="w-full bg-purple-600 text-white font-bold px-4 py-2 rounded-lg text-sm active:scale-95 transition-all shadow-md">Add to Vault</button>
+                        <input type="text" id="task-title-input" placeholder="Chapter name or topic (e.g. Genetics / Optics)..." class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none">
+                        <div class="flex gap-2">
+                            <button id="add-task-btn" class="flex-1 bg-purple-600 text-white font-bold px-4 py-2 rounded-lg text-xs sm:text-sm active:scale-95 transition-all shadow-md">➕ Add to Vault</button>
+                            <button id="add-and-bridge-vault-btn" class="bg-blue-600 text-white font-bold px-3 py-2 rounded-lg text-xs sm:text-sm active:scale-95 transition-all shadow-md" title="Add to Vault and immediately configure Live Protocol / Run Timer">⚡ Add & Run</button>
+                        </div>
                     </div>
 
                     <div id="mcq-add-form" class="hidden bg-slate-900 border border-slate-800 p-4 rounded-xl mb-4 shrink-0">
@@ -793,7 +824,34 @@
                         </div>
                     </div>
 
-                    <div id="vault-list-container" class="flex flex-col gap-2 shrink-0"></div>
+                    <!-- Active Vault List -->
+                    <div id="vault-list-container" class="flex flex-col gap-2 shrink-0 mb-3"></div>
+
+                    <!-- Completed Vault Items Collapsible Section (Just like To-Do List!) -->
+                    <div id="vault-completed-wrapper" class="hidden flex-col mt-2 pt-2 border-t border-slate-800/80">
+                        <button id="vault-completed-toggle" class="flex items-center gap-2 text-xs font-bold text-slate-400 py-2 px-1">
+                            <span id="vault-completed-arrow">▼</span>
+                            <span>Completed Vault Chapters</span>
+                            <span id="vault-completed-count" class="bg-slate-800 text-emerald-400 px-2 py-0.5 rounded-full text-[10px]">0</span>
+                        </button>
+                        <div id="vault-completed-container" class="flex flex-col gap-2 mt-1"></div>
+                    </div>
+                </div>
+
+                <!-- SUB-VIEW C: PRO-GAMER RPG ARENA (LEVEL 0 TO INFINITY) -->
+                <div id="rpg-arena-wrapper" class="hidden flex-col gap-3">
+                    <!-- Quick Reading & Scholar XP Booster Bar -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <span class="text-[10px] font-extrabold uppercase tracking-wider text-amber-400">📖 Scholar & Reading Log</span>
+                            <p class="text-[10px] text-slate-400">Log reading minutes & pages for Daily Boss Quests</p>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button id="rpg-log-read15-btn" class="bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-bold px-2.5 py-1.5 rounded-xl active:scale-95">+15m Read</button>
+                            <button id="rpg-log-pages5-btn" class="bg-blue-500/20 text-blue-300 border border-blue-500/40 text-xs font-bold px-2.5 py-1.5 rounded-xl active:scale-95">+5 Pages</button>
+                        </div>
+                    </div>
+                    <div id="rpg-arena-subview" class="flex flex-col gap-3"></div>
                 </div>
 
                 <div class="bottom-safe-spacer"></div>
@@ -945,11 +1003,79 @@
     </div>
 
     <!-- ========================================================================= -->
-    <!-- BUILT-IN ANDROID-SAFE MODALS (NO NATIVE KEYBOARD OR PROMPT() BUGS)        -->
+    <!-- BUILT-IN ANDROID-SAFE MODALS                                              -->
     <!-- ========================================================================= -->
 
+    <!-- NEW: UNIVERSAL LIVE PROTOCOL & TIMER BRIDGE MODAL (FOR VAULT & TO-DO ITEMS) -->
+    <div id="protocol-bridge-modal" class="hidden fixed inset-0 modal-backdrop z-[340] flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-blue-500/50 rounded-3xl p-4 w-full max-w-md shadow-2xl flex flex-col gap-3 max-h-[92dvh] native-scroll">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                <div>
+                    <h3 class="text-sm font-extrabold text-white uppercase tracking-wider">⚡ Live Protocol & Timer Bridge</h3>
+                    <p id="bridge-modal-subtitle" class="text-[10px] text-blue-400 font-bold">Configure duration, dates & notes</p>
+                </div>
+                <button id="close-bridge-modal-btn" class="text-slate-400 hover:text-white text-lg font-bold px-2">✕</button>
+            </div>
+
+            <!-- Session Title -->
+            <div class="flex flex-col gap-1">
+                <label class="text-[10px] font-bold uppercase text-slate-400">Session / Task Title</label>
+                <input type="text" id="bridge-title-input" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-bold focus:outline-none">
+            </div>
+
+            <!-- Duration (Minutes) + Quick Pills -->
+            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 flex flex-col gap-2">
+                <div class="flex justify-between items-center">
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-400">⏱️ Session Duration (Minutes)</span>
+                    <input type="number" id="bridge-dur-input" value="50" class="w-20 bg-slate-900 border border-emerald-500/50 rounded-lg px-2 py-1 text-sm font-mono font-extrabold text-white text-center focus:outline-none">
+                </div>
+                <div class="grid grid-cols-5 gap-1.5">
+                    <button type="button" class="bridge-dur-pill bg-slate-900 border border-slate-800 text-xs font-mono font-bold py-1.5 rounded-lg text-slate-300 active:scale-95" data-mins="25">25m</button>
+                    <button type="button" class="bridge-dur-pill bg-slate-900 border border-slate-800 text-xs font-mono font-bold py-1.5 rounded-lg text-slate-300 active:scale-95" data-mins="45">45m</button>
+                    <button type="button" class="bridge-dur-pill bg-blue-600/30 border border-blue-500 text-xs font-mono font-bold py-1.5 rounded-lg text-white active:scale-95" data-mins="50">50m</button>
+                    <button type="button" class="bridge-dur-pill bg-slate-900 border border-slate-800 text-xs font-mono font-bold py-1.5 rounded-lg text-slate-300 active:scale-95" data-mins="60">60m</button>
+                    <button type="button" class="bridge-dur-pill bg-slate-900 border border-slate-800 text-xs font-mono font-bold py-1.5 rounded-lg text-slate-300 active:scale-95" data-mins="90">90m</button>
+                </div>
+            </div>
+
+            <!-- Choose Study vs Deen -->
+            <div class="flex flex-col gap-1">
+                <label class="text-[10px] font-bold uppercase text-slate-400">Protocol Category</label>
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" id="bridge-cat-study" class="bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition-all">🧠 Study Block</button>
+                    <button type="button" id="bridge-cat-deen" class="bg-slate-950 text-slate-400 border border-slate-800 font-bold py-2.5 rounded-xl text-xs transition-all">🕌 Deen & Imaan</button>
+                </div>
+            </div>
+
+            <!-- Date & Due Date (Uses Built-in Android-Safe Date Picker) -->
+            <div class="grid grid-cols-2 gap-2">
+                <button type="button" id="bridge-start-date-btn" class="bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-left flex flex-col gap-0.5 active:scale-95">
+                    <span class="text-[9px] font-bold uppercase text-slate-400">📆 Start / Plan Date</span>
+                    <span id="bridge-start-date-label" class="text-xs font-mono font-bold text-blue-400">Today</span>
+                </button>
+                <button type="button" id="bridge-due-date-btn" class="bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-left flex flex-col gap-0.5 active:scale-95">
+                    <span class="text-[9px] font-bold uppercase text-slate-400">📅 Due Date</span>
+                    <span id="bridge-due-date-label" class="text-xs font-mono font-bold text-emerald-400">Not Set</span>
+                </button>
+            </div>
+
+            <!-- Notes -->
+            <textarea id="bridge-note-input" placeholder="Add study notes, page numbers, or sub-targets..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white h-16 resize-none focus:outline-none"></textarea>
+
+            <!-- Action Buttons: Save to Live Protocol OR Run Countdown Now -->
+            <div class="flex gap-2 pt-1">
+                <button type="button" id="bridge-save-protocol-btn" class="flex-1 bg-slate-800 hover:bg-slate-700 text-blue-300 border border-blue-500/40 font-bold py-3 rounded-xl text-xs active:scale-95">
+                    ➕ Save to Live Protocol
+                </button>
+                <button type="button" id="bridge-run-now-btn" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3 rounded-xl text-xs shadow-lg active:scale-95">
+                    ▶️ Run Timer Now
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- 1. IN-APP GOAL & TWO-WAY DATE (DD/MM/YYYY) <-> COUNTDOWN DAYS MODAL -->
-    <div id="goal-date-modal" class="hidden fixed inset-0 modal-backdrop z-[300] flex items-center justify-center p-4">
+    <div id="goal-date-modal" class="hidden fixed inset-0 modal-backdrop z-[350] flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-700 rounded-3xl p-4 w-full max-w-md shadow-2xl flex flex-col gap-3 max-h-[92dvh] native-scroll">
             <div class="flex justify-between items-center border-b border-slate-800 pb-2">
                 <h3 id="goal-modal-heading" class="text-sm font-extrabold text-white uppercase tracking-wider">🎯 Configure Goal & Countdown</h3>
@@ -961,13 +1087,11 @@
                 <input type="text" id="modal-goal-title-input" placeholder="e.g. Cracking NEET / App Launch" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-bold focus:outline-none">
             </div>
 
-            <!-- Tier-1 Deen Purpose Subtitle Input (Only visible when editing Tier 1 Purpose) -->
             <div id="goal-desc-wrapper" class="hidden flex flex-col gap-1">
                 <label class="text-[10px] font-bold uppercase text-slate-400">Lifelong Purpose Subtitle</label>
                 <textarea id="modal-goal-desc-input" placeholder="Follow the Islamic path for my entire life..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white h-16 resize-none focus:outline-none"></textarea>
             </div>
 
-            <!-- Date & Countdown Picker Section (Auto-hidden when editing eternal Tier-1 Purpose) -->
             <div id="goal-date-picker-section" class="bg-slate-950 border border-slate-800 rounded-2xl p-3 flex flex-col gap-2.5">
                 <div class="flex justify-between items-center">
                     <span class="text-[10px] font-extrabold uppercase tracking-wider text-blue-400">📅 In-App Date Selector (DD / MM / YYYY)</span>
@@ -1181,6 +1305,10 @@
             </div>
 
             <div class="flex flex-col gap-2">
+                <button id="detail-protocol-bridge-btn" class="w-full bg-blue-600/20 border border-blue-500/40 p-3 rounded-xl text-left text-xs font-extrabold text-blue-300 flex items-center justify-between active:scale-95">
+                    <span>⚡ Send to Live Protocol / Run Timer</span>
+                    <span>▶️</span>
+                </button>
                 <button id="detail-myday-btn" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-left text-xs font-bold text-slate-200 flex items-center justify-between">
                     <span>☀️ Added to My Day</span>
                     <span id="detail-myday-status" class="text-blue-400">Yes</span>
@@ -1215,11 +1343,11 @@
         </div>
     </div>
 
-    <!-- 7. IN-APP NEW TO-DO LIST MODAL -->
+    <!-- 7. IN-APP NEW TO-DO LIST / CUSTOM SUBJECT MODAL -->
     <div id="new-todolist-modal" class="hidden fixed inset-0 modal-backdrop z-[325] flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-700 rounded-3xl p-5 w-full max-w-xs shadow-2xl flex flex-col gap-3">
-            <h3 class="text-sm font-extrabold text-white uppercase tracking-wider">📁 Create Custom List</h3>
-            <input type="text" id="new-todolist-name-input" placeholder="List Name (e.g. Biology / Errands)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none">
+            <h3 id="new-todolist-modal-title" class="text-sm font-extrabold text-white uppercase tracking-wider">📁 Create Custom List</h3>
+            <input type="text" id="new-todolist-name-input" placeholder="Name (e.g. Biology / Errands)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none">
             <div class="flex gap-2 mt-1">
                 <button id="cancel-new-todolist-btn" class="flex-1 bg-slate-800 text-slate-300 font-bold py-2.5 rounded-xl text-xs">Cancel</button>
                 <button id="confirm-new-todolist-btn" class="flex-1 bg-emerald-600 text-white font-bold py-2.5 rounded-xl text-xs shadow">Create</button>
@@ -1240,7 +1368,7 @@
     <div id="confirm-reset-modal" class="hidden fixed inset-0 modal-backdrop z-[400] flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-red-500/50 rounded-3xl p-5 w-full max-w-xs text-center flex flex-col gap-4 shadow-2xl">
             <span class="text-3xl">⚠️</span>
-            <h3 class="text-base font-extrabold text-white">Factory Reset Pomo?</h3>
+            <h3 class="text-base font-extrabold text-white">Factory Reset DeenTimeR?</h3>
             <p class="text-xs text-slate-300">This will permanently wipe all local data AND your connected Cloud Room.</p>
             <div class="flex gap-2">
                 <button id="cancel-reset-btn" class="flex-1 bg-slate-800 text-slate-300 font-bold py-2.5 rounded-xl text-xs">Cancel</button>
@@ -1255,8 +1383,21 @@
 <!-- ================= END OF PART 1 — PASTE PART 2 RIGHT BELOW THIS LINE ================= -->
     <script>
         /* =========================================================================
-           1. CORE STORAGE, HTML SANITIZER, HAPTICS & WAKE-LOCK ENGINE
+           1. EVENT BUS, CORE STORAGE, SANITIZER & SCREEN ON/OFF ENGINE
            ========================================================================= */
+        const PomoEventBus = {
+            _listeners: {},
+            on(event, fn) {
+                if (!this._listeners[event]) this._listeners[event] = [];
+                this._listeners[event].push(fn);
+            },
+            emit(event, payload) {
+                (this._listeners[event] || []).forEach(fn => {
+                    try { fn(payload); } catch (e) {}
+                });
+            }
+        };
+
         const MEM_CACHE = {};
         function safeGet(key, def) {
             try {
@@ -1323,24 +1464,57 @@
             window._toastTimer = setTimeout(() => toast.classList.add('hidden'), 3200);
         }
 
-        /* Keep Screen On Always (Web WakeLock + Native AndroidBridge) */
+        /* Screen Always ON / OFF Interactive Toggle Engine */
         let wakeLockSentinel = null;
-        async function enforceKeepScreenOn() {
-            try {
-                if (window.AndroidBridge && typeof window.AndroidBridge.setKeepScreenOn === 'function') {
-                    window.AndroidBridge.setKeepScreenOn(true);
-                }
-                if ('wakeLock' in navigator && !wakeLockSentinel) {
-                    wakeLockSentinel = await navigator.wakeLock.request('screen');
-                    wakeLockSentinel.addEventListener('release', () => { wakeLockSentinel = null; });
-                }
-            } catch (e) {}
+        let isScreenAlwaysOn = safeGet('pages_pomodoro_screen_on_v9', 'true') !== 'false';
+
+        async function applyScreenWakeState() {
+            const btn = document.getElementById('screen-wake-toggle-btn');
+            const icon = document.getElementById('screen-wake-icon');
+            const label = document.getElementById('screen-wake-label');
+
+            if (isScreenAlwaysOn) {
+                if (btn) btn.className = "bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 px-2.5 py-2 rounded-xl border border-emerald-500/40 text-xs font-bold flex items-center gap-1 active:scale-95 transition-all shadow-sm";
+                if (icon) icon.textContent = "🔆";
+                if (label) label.textContent = "Screen ON";
+                try {
+                    if (window.AndroidBridge && typeof window.AndroidBridge.setKeepScreenOn === 'function') {
+                        window.AndroidBridge.setKeepScreenOn(true);
+                    }
+                    if ('wakeLock' in navigator && !wakeLockSentinel) {
+                        wakeLockSentinel = await navigator.wakeLock.request('screen');
+                        wakeLockSentinel.addEventListener('release', () => { wakeLockSentinel = null; });
+                    }
+                } catch (e) {}
+            } else {
+                if (btn) btn.className = "bg-slate-800/80 hover:bg-slate-700 text-slate-400 px-2.5 py-2 rounded-xl border border-slate-700 text-xs font-bold flex items-center gap-1 active:scale-95 transition-all shadow-sm";
+                if (icon) icon.textContent = "📴";
+                if (label) label.textContent = "Auto Sleep";
+                try {
+                    if (window.AndroidBridge && typeof window.AndroidBridge.setKeepScreenOn === 'function') {
+                        window.AndroidBridge.setKeepScreenOn(false);
+                    }
+                    if (wakeLockSentinel) {
+                        await wakeLockSentinel.release();
+                        wakeLockSentinel = null;
+                    }
+                } catch (e) {}
+            }
         }
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible') enforceKeepScreenOn();
+
+        document.getElementById('screen-wake-toggle-btn')?.addEventListener('click', () => {
+            haptic(20);
+            isScreenAlwaysOn = !isScreenAlwaysOn;
+            safeSet('pages_pomodoro_screen_on_v9', isScreenAlwaysOn ? 'true' : 'false');
+            applyScreenWakeState();
+            showToast(isScreenAlwaysOn ? "🔆 Screen Always-ON Activated" : "📴 Normal Screen Sleep Restored");
         });
-        document.addEventListener('click', enforceKeepScreenOn, { once: true });
-        enforceKeepScreenOn();
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && isScreenAlwaysOn) applyScreenWakeState();
+        });
+        document.addEventListener('click', () => { if (isScreenAlwaysOn) applyScreenWakeState(); }, { once: true });
+        applyScreenWakeState();
 
         /* =========================================================================
            2. EXTENDED DATA STORE (GOALS, SALAH, MASJID, DEEN, TARGETS, TO-DO)
@@ -1370,7 +1544,8 @@
                 Isha: "19:45"
             },
             salahAlertsEnabled: true,
-            masjidLocationName: "Local Masjid Schedule (Tap any time to customize)"
+            masjidLocationName: "Local Masjid Schedule (Tap any time to customize)",
+            customSubjects: ['Physics', 'Chemistry', 'Biology']
         };
 
         let extConfig = JSON.parse(safeGet('pages_pomodoro_ext_config_v9', 'null')) || defaultExtConfig;
@@ -1381,18 +1556,272 @@
         if (!Array.isArray(extConfig.sideGoals)) extConfig.sideGoals = defaultExtConfig.sideGoals;
         if (!extConfig.salahTimes) extConfig.salahTimes = defaultExtConfig.salahTimes;
         if (extConfig.salahAlertsEnabled === undefined) extConfig.salahAlertsEnabled = true;
+        if (!Array.isArray(extConfig.customSubjects) || extConfig.customSubjects.length === 0) {
+            extConfig.customSubjects = ['Physics', 'Chemistry', 'Biology'];
+        }
 
         let salahHistory = JSON.parse(safeGet('pages_pomodoro_salah_hist_v9', '{}'));
         let deenHistory = JSON.parse(safeGet('pages_pomodoro_deen_hist_v9', '{}'));
+        let todoCompletionHistory = JSON.parse(safeGet('pages_pomodoro_todo_hist_v9', '{}'));
 
         function saveExtConfig() {
             safeSet('pages_pomodoro_ext_config_v9', JSON.stringify(extConfig));
             safeSet('pages_pomodoro_salah_hist_v9', JSON.stringify(salahHistory));
             safeSet('pages_pomodoro_deen_hist_v9', JSON.stringify(deenHistory));
+            safeSet('pages_pomodoro_todo_hist_v9', JSON.stringify(todoCompletionHistory));
+            PomoEventBus.emit('stats:updated');
         }
 
         /* =========================================================================
-           3. FIREBASE OMNI-CLOUD (ANTI-ECHO LOCK + V8 BACKWARDS COMPATIBLE)
+           3. PRO-GAMER RPG LEVELING & WORLD RANKING ENGINE (LEVEL 0 TO INFINITY)
+           ========================================================================= */
+        const RPG_RANKS = [
+            { minLv: 0, title: 'Unranked Novice', badge: '🪨', color: 'text-slate-400' },
+            { minLv: 2, title: 'Bronze Initiate', badge: '🥉', color: 'text-amber-500' },
+            { minLv: 5, title: 'Silver Seeker', badge: '🥈', color: 'text-slate-200' },
+            { minLv: 10, title: 'Gold Vanguard', badge: '🥇', color: 'text-yellow-400' },
+            { minLv: 18, title: 'Platinum Scholar', badge: '💠', color: 'text-cyan-300' },
+            { minLv: 28, title: 'Emerald Tactician', badge: '❇️', color: 'text-emerald-400' },
+            { minLv: 40, title: 'Diamond Master', badge: '💎', color: 'text-blue-400' },
+            { minLv: 55, title: 'Crimson Warlord', badge: '🔥', color: 'text-red-400' },
+            { minLv: 75, title: 'Immortal Grandmaster', badge: '👑', color: 'text-purple-400' },
+            { minLv: 100, title: 'Apex Sovereign (∞)', badge: '🌌', color: 'text-amber-300' }
+        ];
+
+        let todos = JSON.parse(safeGet('pages_pomodoro_todos_v9', '[]'));
+        let todoLists = JSON.parse(safeGet('pages_pomodoro_todolists_v9', '[]'));
+
+        function getDayMetrics(isoDate) {
+            const stats = JSON.parse(safeGet('pages_pomodoro_stats_v8', '{"history":{}}'));
+            const studyMins = stats.history?.[isoDate]?.mins || 0;
+            const sessions = stats.history?.[isoDate]?.sessions || 0;
+            const deenMins = deenHistory[isoDate] || 0;
+            const sMap = salahHistory[isoDate] || {};
+            const salahCount = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'].filter(p => sMap[p]).length;
+            const rLog = JSON.parse(safeGet('pages_pomodoro_reader_log_v1', '{}'));
+            const readMins = rLog[isoDate]?.totalMins || 0;
+            const salahXP = (salahCount * 100) + (salahCount === 5 ? 250 : 0);
+            const totalXP = Math.round((studyMins * 10) + (deenMins * 15) + salahXP + (readMins * 12) + (sessions * 40));
+            return { studyMins, deenMins, salahCount, readMins, sessions, totalXP };
+        }
+
+        window.calculateLifetimeRPGStats = function() {
+            const stats = JSON.parse(safeGet('pages_pomodoro_stats_v8', '{"history":{}}'));
+            const rLog = JSON.parse(safeGet('pages_pomodoro_reader_log_v1', '{}'));
+            const books = JSON.parse(safeGet('pages_pomodoro_reader_books_v1', '[]'));
+
+            const allDates = new Set([
+                ...Object.keys(stats.history || {}),
+                ...Object.keys(deenHistory || {}),
+                ...Object.keys(salahHistory || {}),
+                ...Object.keys(rLog)
+            ]);
+
+            let lifetimeXP = 0, activeDaysCount = 0;
+            allDates.forEach(d => {
+                const m = getDayMetrics(d);
+                if (m.totalXP > 0) activeDaysCount++;
+                lifetimeXP += m.totalXP;
+            });
+
+            const completedTodos = todos.filter(t => t.completed).length;
+            const completedVault = JSON.parse(safeGet('pages_pomodoro_tasks_v8', '[]')).filter(t => t.completed).length;
+            let totalAnnotations = 0, totalPagesRead = 0;
+            books.forEach(b => {
+                totalAnnotations += (b.annotations || []).length;
+                totalPagesRead += Math.max(0, (b.currentPage || 1) - 1);
+            });
+
+            lifetimeXP += (completedTodos * 50) + (completedVault * 80) + (totalAnnotations * 25) + (totalPagesRead * 15);
+
+            const level = Math.floor(Math.sqrt(lifetimeXP / 120));
+            const currentLevelFloorXP = Math.pow(level, 2) * 120;
+            const nextLevelCeilingXP = Math.pow(level + 1, 2) * 120;
+            const xpIntoLevel = lifetimeXP - currentLevelFloorXP;
+            const xpNeededForNext = Math.max(1, nextLevelCeilingXP - currentLevelFloorXP);
+            const levelPct = Math.min(100, Math.round((xpIntoLevel / xpNeededForNext) * 100));
+
+            let rankObj = RPG_RANKS[0];
+            for (const r of RPG_RANKS) { if (level >= r.minLv) rankObj = r; }
+
+            const todayIso = getLocalTodayString();
+            const yestDate = new Date();
+            yestDate.setDate(yestDate.getDate() - 1);
+            const yestIso = getLocalTodayString(yestDate);
+
+            const todayM = getDayMetrics(todayIso);
+            const yestM = getDayMetrics(yestIso);
+            const xpDelta = todayM.totalXP - yestM.totalXP;
+            const pctBetter = yestM.totalXP > 0
+                ? Math.round(((todayM.totalXP - yestM.totalXP) / yestM.totalXP) * 100)
+                : (todayM.totalXP > 0 ? 100 : 0);
+
+            const disciplineScore = Math.min(99.9, Math.round(((todayM.studyMins / 480) * 55 + (todayM.salahCount / 5) * 45) * 10) / 10);
+            const consistencyScore = Math.min(99.9, Math.round((Math.min(1, activeDaysCount / 30) * 60 + (todayM.totalXP >= yestM.totalXP && todayM.totalXP > 0 ? 40 : 20)) * 10) / 10);
+            const readingScore = Math.min(99.9, Math.round((Math.min(1, (todayM.readMins + totalPagesRead * 2) / 120) * 100) * 10) / 10);
+
+            return {
+                lifetimeXP, level, xpIntoLevel, xpNeededForNext, levelPct, rankObj,
+                todayM, yestM, xpDelta, pctBetter,
+                disciplineScore, consistencyScore, readingScore,
+                totalPagesRead, totalAnnotations, activeDaysCount
+            };
+        };
+
+        function updateTopBarRpgBadge() {
+            const rpg = calculateLifetimeRPGStats();
+            const iconEl = document.getElementById('top-rpg-badge-icon');
+            const lvEl = document.getElementById('top-rpg-lv-text');
+            if (iconEl) iconEl.textContent = rpg.rankObj.badge;
+            if (lvEl) lvEl.textContent = `Lv.${rpg.level}`;
+        }
+
+        window.renderRpgArena = function() {
+            updateTopBarRpgBadge();
+            const rpgView = document.getElementById('rpg-arena-subview');
+            if (!rpgView) return;
+            const rpg = calculateLifetimeRPGStats();
+
+            const last7Days = [];
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const iso = getLocalTodayString(d);
+                const m = getDayMetrics(iso);
+                last7Days.push({
+                    label: i === 0 ? 'Today' : (i === 1 ? 'Yest' : d.toLocaleDateString('en-US', { weekday: 'short' })),
+                    xp: m.totalXP
+                });
+            }
+            const max7XP = Math.max(500, ...last7Days.map(x => x.xp));
+            const deltaPositive = rpg.xpDelta >= 0;
+            const deltaBannerColor = deltaPositive
+                ? 'from-emerald-950/90 to-slate-900 border-emerald-500/50 text-emerald-300'
+                : 'from-amber-950/90 to-slate-900 border-amber-500/50 text-amber-300';
+
+            const quests = [
+                { title: '🕋 Pray 5/5 Salah on Time', done: rpg.todayM.salahCount >= 5, prog: `${rpg.todayM.salahCount}/5`, reward: '+750 XP' },
+                { title: '⚔️ Beat Yesterday\'s Total XP', done: rpg.todayM.totalXP > rpg.yestM.totalXP && rpg.todayM.totalXP > 0, prog: `${rpg.todayM.totalXP}/${Math.max(100, rpg.yestM.totalXP)} XP`, reward: '+300 XP' },
+                { title: '🧠 Complete 4.0h Deep Study', done: rpg.todayM.studyMins >= 240, prog: `${(rpg.todayM.studyMins / 60).toFixed(1)}/4.0h`, reward: '+400 XP' },
+                { title: '📖 Read Books for 30 Mins', done: rpg.todayM.readMins >= 30, prog: `${rpg.todayM.readMins}/30m`, reward: '+360 XP' }
+            ];
+
+            rpgView.innerHTML = `
+                <div class="rpg-card-glow rounded-3xl p-5 flex flex-col gap-3">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-16 h-16 rounded-2xl bg-slate-950 border-2 border-blue-500 flex flex-col items-center justify-center shadow-lg">
+                                <span class="text-2xl leading-none">${rpg.rankObj.badge}</span>
+                                <span class="text-[10px] font-mono font-extrabold text-blue-400 mt-1">LV.${rpg.level}</span>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-extrabold uppercase tracking-widest bg-blue-500/20 text-blue-300 px-2.5 py-0.5 rounded-full border border-blue-500/30">Global Player Progression (Lv.0 → ∞)</span>
+                                <h3 class="text-lg sm:text-xl font-extrabold ${rpg.rankObj.color} mt-1">${rpg.rankObj.title}</h3>
+                                <p class="text-xs text-slate-400 font-mono">Lifetime Score: <b class="text-white">${rpg.lifetimeXP.toLocaleString()} XP</b> • Active Days: <b class="text-emerald-400">${rpg.activeDaysCount}d</b></p>
+                            </div>
+                        </div>
+                        <div class="text-right bg-slate-950/90 border border-slate-800 px-4 py-2.5 rounded-2xl">
+                            <p class="text-[10px] font-bold uppercase text-slate-400">Global Standing</p>
+                            <p class="text-base font-mono font-extrabold text-amber-400">Top ${(100 - Math.min(99.8, (rpg.disciplineScore + rpg.consistencyScore + rpg.readingScore) / 3)).toFixed(1)}% Worldwide</p>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs font-mono mb-1">
+                            <span class="text-slate-300 font-bold">Level ${rpg.level} ➔ Level ${rpg.level + 1}</span>
+                            <span class="text-blue-400 font-extrabold">${rpg.xpIntoLevel.toLocaleString()} / ${rpg.xpNeededForNext.toLocaleString()} XP (${rpg.levelPct}%)</span>
+                        </div>
+                        <div class="w-full h-3 bg-slate-950 rounded-full overflow-hidden border border-slate-800 p-0.5">
+                            <div class="h-full bg-gradient-to-r from-blue-600 via-cyan-400 to-emerald-400 rounded-full transition-all duration-500" style="width: ${rpg.levelPct}%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r ${deltaBannerColor} border rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3 shadow-lg">
+                    <div>
+                        <span class="text-[10px] font-extrabold uppercase tracking-widest opacity-80">⚡ Day-by-Day Progression (Today vs. Yesterday)</span>
+                        <h4 class="text-sm sm:text-base font-extrabold text-white mt-0.5">
+                            ${deltaPositive
+                                ? `🔥 You are +${rpg.pctBetter}% more productive than Yesterday (+${rpg.xpDelta} XP ahead)!`
+                                : `⚔️ ${Math.abs(rpg.xpDelta)} XP needed to beat Yesterday's score (${Math.ceil(Math.abs(rpg.xpDelta) / 10)}m of Study to overtake!)`}
+                        </h4>
+                        <p class="text-xs text-slate-300 mt-1 font-mono">
+                            Today: <b>${rpg.todayM.totalXP} XP</b> (${(rpg.todayM.studyMins/60).toFixed(1)}h Study • ${rpg.todayM.readMins}m Read • ${rpg.todayM.salahCount}/5 Salah)
+                            &nbsp;|&nbsp; Yesterday: <b>${rpg.yestM.totalXP} XP</b>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5">
+                        <div class="flex justify-between items-center mb-1.5"><span class="text-xs font-extrabold text-blue-400">⚔️ World Discipline</span><span class="text-xs font-mono font-extrabold text-white">${rpg.disciplineScore}%</span></div>
+                        <div class="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800"><div class="h-full bg-blue-500 rounded-full" style="width:${rpg.disciplineScore}%"></div></div>
+                        <p class="text-[10px] text-slate-400 mt-1.5">Focus Hours + 5/5 Salah vs. Global Average</p>
+                    </div>
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5">
+                        <div class="flex justify-between items-center mb-1.5"><span class="text-xs font-extrabold text-emerald-400">🔥 Consistency Index</span><span class="text-xs font-mono font-extrabold text-white">${rpg.consistencyScore}%</span></div>
+                        <div class="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800"><div class="h-full bg-emerald-500 rounded-full" style="width:${rpg.consistencyScore}%"></div></div>
+                        <p class="text-[10px] text-slate-400 mt-1.5">Active Days (${rpg.activeDaysCount}d) & Daily Momentum</p>
+                    </div>
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5">
+                        <div class="flex justify-between items-center mb-1.5"><span class="text-xs font-extrabold text-amber-400">📖 Scholar & Reading</span><span class="text-xs font-mono font-extrabold text-white">${rpg.readingScore}%</span></div>
+                        <div class="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800"><div class="h-full bg-amber-500 rounded-full" style="width:${rpg.readingScore}%"></div></div>
+                        <p class="text-[10px] text-slate-400 mt-1.5">${rpg.totalPagesRead} Pages Read • ${rpg.totalAnnotations} Notes/Highlights</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between">
+                        <span class="text-xs font-extrabold text-white uppercase tracking-wider mb-3">📊 7-Day XP Progression Curve</span>
+                        <div class="grid grid-cols-7 gap-2 items-end h-36 pt-4">
+                            ${last7Days.map((d, idx) => {
+                                const hPct = Math.max(8, Math.round((d.xp / max7XP) * 100));
+                                const isToday = idx === 6;
+                                return `<div class="flex flex-col items-center justify-end h-full gap-1"><span class="text-[9px] font-mono font-bold ${isToday ? 'text-emerald-400' : 'text-slate-400'}">${d.xp}</span><div class="w-full rounded-t-lg ${isToday ? 'bg-gradient-to-t from-emerald-600 to-teal-300' : 'bg-gradient-to-t from-blue-700 to-blue-400'}" style="height:${hPct}%"></div><span class="text-[10px] font-bold ${isToday ? 'text-white' : 'text-slate-400'}">${d.label}</span></div>`;
+                            }).join('')}
+                        </div>
+                    </div>
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col gap-2">
+                        <span class="text-xs font-extrabold text-amber-400 uppercase tracking-wider mb-1">🎯 Daily Boss Quests</span>
+                        ${quests.map(q => `<div class="flex items-center justify-between bg-slate-950 px-3 py-2 rounded-xl border ${q.done ? 'border-emerald-500/50 bg-emerald-950/20' : 'border-slate-800'}"><div><p class="text-xs font-bold ${q.done ? 'text-emerald-300 line-through' : 'text-slate-200'}">${q.title}</p><span class="text-[10px] font-mono text-slate-400">Progress: ${q.prog}</span></div><span class="text-[10px] font-mono font-extrabold px-2 py-1 rounded-lg ${q.done ? 'bg-emerald-600 text-white' : 'bg-slate-900 text-amber-400 border border-slate-800'}">${q.done ? '✓ CLAIMED' : q.reward}</span></div>`).join('')}
+                    </div>
+                </div>
+            `;
+        };
+
+        // RPG Quick Reading & Pages Log Buttons
+        document.getElementById('rpg-log-read15-btn')?.addEventListener('click', () => {
+            haptic(20);
+            const today = getLocalTodayString();
+            const rLog = JSON.parse(safeGet('pages_pomodoro_reader_log_v1', '{}'));
+            if (!rLog[today]) rLog[today] = { totalMins: 0 };
+            rLog[today].totalMins = (rLog[today].totalMins || 0) + 15;
+            safeSet('pages_pomodoro_reader_log_v1', JSON.stringify(rLog));
+            PomoEventBus.emit('reading:minuteLogged');
+            renderRpgArena();
+            broadcastToCloud();
+            showToast("📖 +15m Reading Logged (+180 XP)!");
+        });
+
+        document.getElementById('rpg-log-pages5-btn')?.addEventListener('click', () => {
+            haptic(20);
+            const books = JSON.parse(safeGet('pages_pomodoro_reader_books_v1', '[]'));
+            if (books.length === 0) books.push({ id: 1, title: 'Study Tracker', currentPage: 6, annotations: [] });
+            else books[0].currentPage = (books[0].currentPage || 1) + 5;
+            safeSet('pages_pomodoro_reader_books_v1', JSON.stringify(books));
+            PomoEventBus.emit('reader:updated');
+            renderRpgArena();
+            broadcastToCloud();
+            showToast("📖 +5 Pages Logged (+75 XP)!");
+        });
+
+        PomoEventBus.on('stats:updated', updateTopBarRpgBadge);
+        PomoEventBus.on('todos:updated', updateTopBarRpgBadge);
+        PomoEventBus.on('vault:updated', updateTopBarRpgBadge);
+        PomoEventBus.on('reader:updated', updateTopBarRpgBadge);
+        PomoEventBus.on('reading:minuteLogged', updateTopBarRpgBadge);
+
+        /* =========================================================================
+           4. FIREBASE OMNI-CLOUD (100% BACKWARDS COMPATIBLE WITH V8)
            ========================================================================= */
         const firebaseConfig = {
             apiKey: "AIzaSyAbi9-V0S3DOtOAgBirMxrvV6J-XdwLf3Q",
@@ -1410,9 +1839,7 @@
                 db = firebase.firestore();
                 auth = firebase.auth();
             }
-        } catch (e) {
-            console.warn("Running in pure offline mode.");
-        }
+        } catch (e) {}
 
         async function authenticateForCloud() {
             if (!auth) { isAuthReady = false; return false; }
@@ -1462,8 +1889,11 @@
                         extConfig,
                         salahHistory,
                         deenHistory,
+                        todoCompletionHistory,
                         todos: JSON.parse(safeGet('pages_pomodoro_todos_v9', '[]')),
-                        todoLists: JSON.parse(safeGet('pages_pomodoro_todolists_v9', '[]'))
+                        todoLists: JSON.parse(safeGet('pages_pomodoro_todolists_v9', '[]')),
+                        rLog: JSON.parse(safeGet('pages_pomodoro_reader_log_v1', '{}')),
+                        books: JSON.parse(safeGet('pages_pomodoro_reader_books_v1', '[]'))
                     });
 
                     const roomDoc = db.collection('artifacts').doc('neettimercloud').collection('public').doc('data').collection('sync_rooms').doc(currentSyncRoom);
@@ -1547,6 +1977,9 @@
                             if (ext.extConfig) { extConfig = ext.extConfig; safeSet('pages_pomodoro_ext_config_v9', JSON.stringify(extConfig)); }
                             if (ext.salahHistory) { salahHistory = ext.salahHistory; safeSet('pages_pomodoro_salah_hist_v9', JSON.stringify(ext.salahHistory)); }
                             if (ext.deenHistory) { deenHistory = ext.deenHistory; safeSet('pages_pomodoro_deen_hist_v9', JSON.stringify(ext.deenHistory)); }
+                            if (ext.todoCompletionHistory) { todoCompletionHistory = ext.todoCompletionHistory; safeSet('pages_pomodoro_todo_hist_v9', JSON.stringify(todoCompletionHistory)); }
+                            if (ext.rLog) safeSet('pages_pomodoro_reader_log_v1', JSON.stringify(ext.rLog));
+                            if (ext.books) safeSet('pages_pomodoro_reader_books_v1', JSON.stringify(ext.books));
                             if (Array.isArray(ext.todos)) {
                                 todos = ext.todos;
                                 safeSet('pages_pomodoro_todos_v9', JSON.stringify(todos));
@@ -1561,6 +1994,7 @@
                             renderHomeHUD();
                             renderSalahStrip();
                             renderCompassView();
+                            updateTopBarRpgBadge();
                         } catch (err) {}
                     }
 
@@ -1622,7 +2056,6 @@
             syncPassInp.type = syncPassInp.type === 'password' ? 'text' : 'password';
         });
 
-        /* Offline JSON Backup & Restore */
         document.getElementById('export-backup-btn').addEventListener('click', () => {
             const dump = {};
             for (let i = 0; i < localStorage.length; i++) {
@@ -1651,7 +2084,7 @@
         });
 
         /* =========================================================================
-           4. NAVIGATION, ANDROID BACK BUTTON & DIM MODE
+           5. NAVIGATION, SUBVIEWS (COMPASS / VAULT / RPG) & ANDROID BACK BUTTON
            ========================================================================= */
         let currentPageId = 'page-timer';
         function switchPage(targetId) {
@@ -1663,10 +2096,10 @@
                 else btn.classList.remove('active');
             });
             currentPageId = targetId;
-            if (targetId === 'page-timer') { renderHomeHUD(); renderSalahStrip(); evaluateDriftAndAlerts(); }
+            if (targetId === 'page-timer') { renderHomeHUD(); renderSalahStrip(); evaluateDriftAndAlerts(); updateTopBarRpgBadge(); }
             if (targetId === 'page-schedule') { renderSchedule(); populateSettingsList(); }
-            if (targetId === 'page-todo') { renderTodoListsBar(); renderTodos(); }
-            if (targetId === 'page-vault') { renderCompassView(); renderTasks(activeTaskTab); }
+            if (targetId === 'page-todo') { renderTodoListsBar(); renderTodos(); renderTodoAnalytics(); }
+            if (targetId === 'page-vault') { renderCompassView(); renderCustomSubjectBar(); renderTasks(activeTaskTab); renderRpgArena(); }
             if (targetId === 'page-settings') { renderStats(); renderSettingsSalahList(); }
         }
 
@@ -1678,6 +2111,10 @@
             switchPage('page-vault');
             activateVaultSubview('compass');
         });
+        document.getElementById('top-rpg-pill')?.addEventListener('click', () => {
+            switchPage('page-vault');
+            activateVaultSubview('rpg');
+        });
         document.getElementById('home-masjid-Config-btn').addEventListener('click', () => {
             switchPage('page-settings');
             document.querySelector('.prof-tab[data-tab="prof-salah"]')?.click();
@@ -1685,7 +2122,7 @@
 
         window.handleAndroidBack = function() {
             const openModals = [
-                'goal-date-modal', 'inapp-time-modal', 'targets-modal',
+                'protocol-bridge-modal', 'goal-date-modal', 'inapp-time-modal', 'targets-modal',
                 'custom-repeat-modal', 'todo-detail-modal', 'todo-suggestions-modal',
                 'new-todolist-modal', 'confirm-reset-modal', 'full-screen-guide-overlay'
             ];
@@ -1707,15 +2144,11 @@
             return false;
         };
 
-        window.addEventListener('popstate', () => {
-            window.handleAndroidBack();
-        });
+        window.addEventListener('popstate', () => { window.handleAndroidBack(); });
 
-        // Power-Saving OLED Dim Mode
         document.getElementById('dim-toggle-btn').addEventListener('click', () => {
             haptic(20);
             document.body.classList.add('dim-mode');
-            enforceKeepScreenOn();
         });
         document.getElementById('dim-exit-btn').addEventListener('click', () => {
             haptic(15);
@@ -1727,7 +2160,6 @@
             else startTimer();
         });
 
-        // Profile Inner Tabs
         document.querySelectorAll('.prof-tab').forEach(tab => {
             tab.addEventListener('click', (e) => {
                 const targetId = e.currentTarget.getAttribute('data-tab');
@@ -1739,32 +2171,212 @@
             });
         });
 
-        // Vault Sub-view Switcher
         function activateVaultSubview(mode) {
             const compBtn = document.getElementById('mode-compass-btn');
             const neetBtn = document.getElementById('mode-neet-vault-btn');
+            const rpgBtn = document.getElementById('mode-rpg-arena-btn');
             const compView = document.getElementById('compass-subview');
             const neetView = document.getElementById('neet-vault-subview');
+            const rpgView = document.getElementById('rpg-arena-wrapper');
+
+            compBtn.className = "flex-1 bg-transparent text-slate-400 font-bold py-2 rounded-lg text-xs transition-all";
+            neetBtn.className = "flex-1 bg-transparent text-slate-400 font-bold py-2 rounded-lg text-xs transition-all";
+            rpgBtn.className = "flex-1 bg-transparent text-slate-400 font-bold py-2 rounded-lg text-xs transition-all";
+
+            compView.classList.add('hidden');
+            neetView.classList.add('hidden');
+            rpgView.classList.add('hidden');
+
             if (mode === 'compass') {
                 compBtn.className = "flex-1 bg-emerald-600 text-white font-bold py-2 rounded-lg text-xs shadow-md transition-all";
-                neetBtn.className = "flex-1 bg-transparent text-slate-400 font-bold py-2 rounded-lg text-xs transition-all";
                 compView.classList.remove('hidden');
-                neetView.classList.add('hidden');
                 renderCompassView();
-            } else {
+            } else if (mode === 'neet') {
                 neetBtn.className = "flex-1 bg-purple-600 text-white font-bold py-2 rounded-lg text-xs shadow-md transition-all";
-                compBtn.className = "flex-1 bg-transparent text-slate-400 font-bold py-2 rounded-lg text-xs transition-all";
                 neetView.classList.remove('hidden');
                 neetView.classList.add('flex');
-                compView.classList.add('hidden');
+                renderCustomSubjectBar();
                 renderTasks(activeTaskTab);
+            } else if (mode === 'rpg') {
+                rpgBtn.className = "flex-1 bg-blue-600 text-white font-bold py-2 rounded-lg text-xs shadow-md transition-all";
+                rpgView.classList.remove('hidden');
+                rpgView.classList.add('flex');
+                renderRpgArena();
             }
         }
         document.getElementById('mode-compass-btn').addEventListener('click', () => activateVaultSubview('compass'));
         document.getElementById('mode-neet-vault-btn').addEventListener('click', () => activateVaultSubview('neet'));
+        document.getElementById('mode-rpg-arena-btn')?.addEventListener('click', () => activateVaultSubview('rpg'));
 
         /* =========================================================================
-           5. TIMER, LIVE PROTOCOL & AUDIO ENGINE
+           6. UNIVERSAL LIVE PROTOCOL & TIMER BRIDGE (VAULT & TO-DO INTEGRATION)
+           ========================================================================= */
+        let bridgeSourceType = 'vault'; // 'vault' | 'todo'
+        let bridgeSourceId = null;
+        let bridgeCategory = 'study'; // 'study' | 'deen'
+        let bridgeStartDate = getLocalTodayString();
+        let bridgeDueDate = '';
+
+        function updateBridgeCategoryUI() {
+            const sBtn = document.getElementById('bridge-cat-study');
+            const dBtn = document.getElementById('bridge-cat-deen');
+            if (bridgeCategory === 'deen') {
+                dBtn.className = "bg-emerald-600 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition-all";
+                sBtn.className = "bg-slate-950 text-slate-400 border border-slate-800 font-bold py-2.5 rounded-xl text-xs transition-all";
+            } else {
+                sBtn.className = "bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition-all";
+                dBtn.className = "bg-slate-950 text-slate-400 border border-slate-800 font-bold py-2.5 rounded-xl text-xs transition-all";
+            }
+        }
+
+        window.openProtocolBridge = function(sourceType, itemId) {
+            haptic(15);
+            bridgeSourceType = sourceType;
+            bridgeSourceId = itemId;
+            const today = getLocalTodayString();
+
+            if (sourceType === 'vault') {
+                const tasks = JSON.parse(safeGet('pages_pomodoro_tasks_v8', '[]'));
+                const item = tasks.find(x => x.id === itemId);
+                if (!item) return;
+                document.getElementById('bridge-modal-subtitle').textContent = `📚 Study Vault (${item.subject} • ${item.type.toUpperCase()}) ➔ Live Protocol`;
+                document.getElementById('bridge-title-input').value = `[${item.subject}] ${item.title}`;
+                document.getElementById('bridge-dur-input').value = item.durationMins || 50;
+                bridgeCategory = item.category || 'study';
+                bridgeStartDate = item.startDate || today;
+                bridgeDueDate = item.dueDate || '';
+                document.getElementById('bridge-note-input').value = item.note || '';
+            } else {
+                const item = todos.find(x => x.id === itemId);
+                if (!item) return;
+                document.getElementById('bridge-modal-subtitle').textContent = `☑️ To-Do Task ➔ Live Protocol & Timer`;
+                document.getElementById('bridge-title-input').value = item.title;
+                document.getElementById('bridge-dur-input').value = item.durationMins || 45;
+                bridgeCategory = item.category || 'study';
+                bridgeStartDate = item.startDate || today;
+                bridgeDueDate = item.dueDate || '';
+                document.getElementById('bridge-note-input').value = item.note || '';
+            }
+
+            updateBridgeCategoryUI();
+            document.getElementById('bridge-start-date-label').textContent = formatDDMMYYYY(bridgeStartDate);
+            document.getElementById('bridge-due-date-label').textContent = bridgeDueDate ? formatDDMMYYYY(bridgeDueDate) : 'Not Set';
+            document.getElementById('protocol-bridge-modal').classList.remove('hidden');
+        };
+
+        document.getElementById('close-bridge-modal-btn')?.addEventListener('click', () => {
+            document.getElementById('protocol-bridge-modal').classList.add('hidden');
+        });
+
+        document.querySelectorAll('.bridge-dur-pill').forEach(pill => {
+            pill.addEventListener('click', (e) => {
+                haptic(10);
+                const mins = e.currentTarget.getAttribute('data-mins');
+                document.getElementById('bridge-dur-input').value = mins;
+                document.querySelectorAll('.bridge-dur-pill').forEach(p => {
+                    p.className = p.getAttribute('data-mins') === mins
+                        ? "bridge-dur-pill bg-blue-600/30 border border-blue-500 text-xs font-mono font-bold py-1.5 rounded-lg text-white active:scale-95"
+                        : "bridge-dur-pill bg-slate-900 border border-slate-800 text-xs font-mono font-bold py-1.5 rounded-lg text-slate-300 active:scale-95";
+                });
+            });
+        });
+
+        document.getElementById('bridge-cat-study')?.addEventListener('click', () => { bridgeCategory = 'study'; updateBridgeCategoryUI(); });
+        document.getElementById('bridge-cat-deen')?.addEventListener('click', () => { bridgeCategory = 'deen'; updateBridgeCategoryUI(); });
+        document.getElementById('bridge-start-date-btn')?.addEventListener('click', () => openGoalModal('bridge-start-date'));
+        document.getElementById('bridge-due-date-btn')?.addEventListener('click', () => openGoalModal('bridge-due-date'));
+
+        function commitBridgeDataAndCreateBlock(runImmediately = false) {
+            haptic(20);
+            const titleVal = document.getElementById('bridge-title-input').value.trim() || 'Focus Session';
+            const mins = Math.max(1, parseInt(document.getElementById('bridge-dur-input').value) || 50);
+            const noteVal = document.getElementById('bridge-note-input').value.trim();
+
+            if (bridgeSourceType === 'vault') {
+                const tasks = JSON.parse(safeGet('pages_pomodoro_tasks_v8', '[]'));
+                const item = tasks.find(x => x.id === bridgeSourceId);
+                if (item) {
+                    item.durationMins = mins;
+                    item.category = bridgeCategory;
+                    item.startDate = bridgeStartDate;
+                    item.dueDate = bridgeDueDate;
+                    item.note = noteVal;
+                    safeSet('pages_pomodoro_tasks_v8', JSON.stringify(tasks));
+                    renderTasks(activeTaskTab);
+                }
+            } else {
+                const item = todos.find(x => x.id === bridgeSourceId);
+                if (item) {
+                    item.durationMins = mins;
+                    item.category = bridgeCategory;
+                    item.startDate = bridgeStartDate;
+                    if (bridgeDueDate) item.dueDate = bridgeDueDate;
+                    item.note = noteVal;
+                    saveTodos();
+                    renderTodos();
+                }
+            }
+
+            const newBlock = {
+                id: Date.now(),
+                type: 'work',
+                category: bridgeCategory,
+                title: titleVal,
+                duration: mins * 60,
+                linkedSource: bridgeSourceType,
+                linkedId: bridgeSourceId,
+                note: noteVal
+            };
+
+            const wasEmpty = schedule.length === 0;
+            schedule.push(newBlock);
+            const newIdx = schedule.length - 1;
+            safeSet('pages_pomodoro_schedule_v8', JSON.stringify(schedule));
+
+            document.getElementById('protocol-bridge-modal').classList.add('hidden');
+            document.getElementById('todo-detail-modal').classList.add('hidden');
+
+            if (runImmediately) {
+                stopTimer(true, true);
+                killActiveAlarms();
+                loadStep(newIdx, false);
+                switchPage('page-timer');
+                startTimer();
+                showToast(`▶️ Running "${titleVal}" (${mins}m)!`);
+            } else {
+                if (wasEmpty) loadStep(0, false);
+                renderSchedule();
+                broadcastToCloud();
+                showToast(`➕ Added "${titleVal}" (${mins}m) to Live Protocol!`);
+            }
+        }
+
+        document.getElementById('bridge-save-protocol-btn')?.addEventListener('click', () => commitBridgeDataAndCreateBlock(false));
+        document.getElementById('bridge-run-now-btn')?.addEventListener('click', () => commitBridgeDataAndCreateBlock(true));
+
+        // Sync completion from Live Protocol back to linked Study Vault or To-Do item
+        function syncLinkedItemCompletion(block) {
+            if (!block || !block.linkedSource || !block.linkedId) return;
+            const today = getLocalTodayString();
+            if (block.linkedSource === 'vault') {
+                const tasks = JSON.parse(safeGet('pages_pomodoro_tasks_v8', '[]'));
+                const item = tasks.find(x => x.id === block.linkedId);
+                if (item && !item.completed) {
+                    item.completed = true;
+                    item.completedAt = today;
+                    safeSet('pages_pomodoro_tasks_v8', JSON.stringify(tasks));
+                    PomoEventBus.emit('vault:updated');
+                }
+            } else if (block.linkedSource === 'todo') {
+                const item = todos.find(x => x.id === block.linkedId);
+                if (item && !item.completed) {
+                    window.toggleTodoComplete(item.id);
+                }
+            }
+        }
+
+        /* =========================================================================
+           7. TIMER, LIVE PROTOCOL & AUDIO ENGINE
            ========================================================================= */
         let schedule = JSON.parse(safeGet('pages_pomodoro_schedule_v8', '[]'));
         let weeklyTemplates = JSON.parse(safeGet('pages_pomodoro_weekly_v8', 'null'));
@@ -1809,7 +2421,7 @@
             if (!cont) return;
             cont.innerHTML = '';
             if (schedule.length === 0) {
-                cont.innerHTML = `<p class="text-slate-500 italic p-4 text-xs text-center bg-slate-900/50 rounded-xl border border-slate-800/60">Live Protocol empty. Insert a block above or load your daily template below.</p>`;
+                cont.innerHTML = `<p class="text-slate-500 italic p-4 text-xs text-center bg-slate-900/50 rounded-xl border border-slate-800/60">Live Protocol empty. Insert a block above, load your template, or send items from Study Vault / To-Do!</p>`;
                 document.getElementById('session-count-badge').textContent = `0 Remaining`;
                 return;
             }
@@ -1832,13 +2444,14 @@
                 const mins = Math.max(1, Math.round(item.duration / 60));
                 const deenFlag = isDeenBlock(item);
                 const icon = item.type === 'break' ? '💧' : (deenFlag ? '🕌' : '🧠');
+                const linkedTag = item.linkedSource ? `<span class="text-[9px] text-purple-400 font-bold ml-1">• Linked ${item.linkedSource === 'vault' ? '📚 Vault' : '☑️ To-Do'}</span>` : '';
 
                 div.innerHTML = `
                     <div class="flex items-center gap-2.5 min-w-0 flex-1 pr-2">
                         <span class="text-base shrink-0">${icon}</span>
                         <div class="min-w-0 flex-1">
                             <p class="text-xs sm:text-sm font-bold truncate ${index === currentStepIndex ? 'text-blue-400' : 'text-slate-200'}">${escapeHtml(item.title)}</p>
-                            <span class="text-[10px] font-mono text-slate-400">${mins} mins • ${item.type === 'break' ? 'Break' : (deenFlag ? 'Deen' : 'Study')}</span>
+                            <span class="text-[10px] font-mono text-slate-400">${mins} mins • ${item.type === 'break' ? 'Break' : (deenFlag ? 'Deen' : 'Study')}${linkedTag}</span>
                         </div>
                     </div>
                     <div class="flex items-center gap-1 shrink-0">
@@ -1907,6 +2520,7 @@
                 const item = schedule[index];
                 if (item.status !== 'completed') {
                     item.status = 'completed';
+                    syncLinkedItemCompletion(item);
                     if (item.type === 'work' && !item._credited) {
                         item._credited = true;
                         const mins = Math.max(1, Math.round(item.duration / 60));
@@ -1921,6 +2535,7 @@
                             stats.history[today].sessions += 1;
                             safeSet('pages_pomodoro_stats_v8', JSON.stringify(stats));
                         }
+                        PomoEventBus.emit('stats:updated');
                         renderStats();
                         renderHomeHUD();
                         renderCompassView();
@@ -1964,7 +2579,6 @@
             showToast("Inserted into Live Protocol!");
         });
 
-        // Preserves isOvertime when preserveState === true on app restart
         function loadStep(index, preserveState = false) {
             currentStepIndex = Math.max(0, Math.min(index, schedule.length));
             if (!preserveState) {
@@ -1981,12 +2595,12 @@
                 updateDisplay();
                 sessionTypeDisplay.textContent = schedule.length === 0 ? "No Sessions Loaded" : "All Sessions Done";
                 currentPhaseDisplay.textContent = schedule.length === 0 ? "PROTOCOL EMPTY" : "PROTOCOL COMPLETE";
-                currentPhaseDisplay.className = "mt-1.5 bg-emerald-500/10 px-4 py-0.5 rounded-full text-[10px] font-bold text-emerald-400 border border-emerald-500/20 uppercase tracking-widest font-phase";
+                currentPhaseDisplay.className = "mt-1.5 bg-emerald-500/10 px-3.5 py-0.5 rounded-full text-[10px] font-bold text-emerald-400 border border-emerald-500/20 uppercase tracking-widest font-phase";
                 document.getElementById('anim-study')?.classList.add('hidden');
                 document.getElementById('anim-deen')?.classList.add('hidden');
                 document.getElementById('anim-break')?.classList.add('hidden');
                 document.getElementById('guide-box-title').textContent = schedule.length === 0 ? "🤖 System Ready" : "🎉 Day Complete";
-                document.getElementById('deep-guide-text').textContent = schedule.length === 0 ? "Open the Plan tab to load or build your daily schedule." : "Alhamdulillah! Incredible work today.";
+                document.getElementById('deep-guide-text').textContent = schedule.length === 0 ? "Open the Plan, To-Do, or Study Vault tab to run a session." : "Alhamdulillah! Incredible work today.";
                 stopTimer(true, true);
                 document.getElementById('start-btn').classList.add('hidden');
                 document.getElementById('pause-btn').classList.add('hidden');
@@ -2008,18 +2622,18 @@
             if (currentSession.type === 'work') {
                 currentPhaseDisplay.textContent = deenBlock ? "DEEN & IMAAN PHASE" : "DEEP STUDY PHASE";
                 currentPhaseDisplay.className = deenBlock
-                    ? "mt-1.5 bg-emerald-500/15 px-4 py-0.5 rounded-full text-[10px] font-bold text-emerald-400 border border-emerald-500/30 uppercase tracking-widest font-phase"
-                    : "mt-1.5 bg-tomato/15 px-4 py-0.5 rounded-full text-[10px] font-bold text-tomato border border-tomato/30 uppercase tracking-widest font-phase";
+                    ? "mt-1.5 bg-emerald-500/15 px-3.5 py-0.5 rounded-full text-[10px] font-bold text-emerald-400 border border-emerald-500/30 uppercase tracking-widest font-phase"
+                    : "mt-1.5 bg-tomato/15 px-3.5 py-0.5 rounded-full text-[10px] font-bold text-tomato border border-tomato/30 uppercase tracking-widest font-phase";
                 document.getElementById('guide-box-title').textContent = deenBlock ? "🕌 Deen Focus Protocol" : "🔥 Coach: Focus Protocol";
-                document.getElementById('deep-guide-text').textContent = deenBlock
-                    ? "Strengthening your Imaan brings Barakah to your entire day."
-                    : studyQuotes[Math.floor(Math.random() * studyQuotes.length)];
+                document.getElementById('deep-guide-text').textContent = currentSession.note
+                    ? `📝 Note: ${currentSession.note}`
+                    : (deenBlock ? "Strengthening your Imaan brings Barakah to your entire day." : studyQuotes[Math.floor(Math.random() * studyQuotes.length)]);
                 document.getElementById('anim-study')?.classList.toggle('hidden', deenBlock);
                 document.getElementById('anim-deen')?.classList.toggle('hidden', !deenBlock);
                 document.getElementById('anim-break')?.classList.add('hidden');
             } else {
                 currentPhaseDisplay.textContent = "RECOVERY PHASE";
-                currentPhaseDisplay.className = "mt-1.5 bg-blue-500/15 px-4 py-0.5 rounded-full text-[10px] font-bold text-blue-400 border border-blue-500/30 uppercase tracking-widest font-phase";
+                currentPhaseDisplay.className = "mt-1.5 bg-blue-500/15 px-3.5 py-0.5 rounded-full text-[10px] font-bold text-blue-400 border border-blue-500/30 uppercase tracking-widest font-phase";
                 document.getElementById('guide-box-title').textContent = "💧 Coach: Break Protocol";
                 document.getElementById('deep-guide-text').textContent = breakQuotes[Math.floor(Math.random() * breakQuotes.length)];
                 document.getElementById('anim-study')?.classList.add('hidden');
@@ -2081,7 +2695,7 @@
 
         function startTimer(skipBc = false) {
             if (isRunning || currentStepIndex >= schedule.length) return;
-            enforceKeepScreenOn();
+            if (isScreenAlwaysOn) applyScreenWakeState();
             try {
                 if (!fallbackCtx) fallbackCtx = new (window.AudioContext || window.webkitAudioContext)();
                 if (fallbackCtx.state === 'suspended') fallbackCtx.resume();
@@ -2122,7 +2736,6 @@
             if (!skipBc) broadcastToCloud();
         }
 
-        /* Synthesized Alarms & Chimes */
         let fallbackCtx = null, activeAlarmNodes = [];
         function killActiveAlarms() {
             activeAlarmNodes.forEach(n => { try { n.stop(); n.disconnect(); } catch (e) {} });
@@ -2212,6 +2825,7 @@
 
             safeSet('pages_pomodoro_stats_v8', JSON.stringify(stats));
             saveExtConfig();
+            PomoEventBus.emit('stats:updated');
             renderStats();
             renderHomeHUD();
             evaluateDriftAndAlerts();
@@ -2228,6 +2842,7 @@
             if (cur) {
                 cur.status = 'completed';
                 cur._credited = true;
+                syncLinkedItemCompletion(cur);
             }
             safeSet('pages_pomodoro_schedule_v8', JSON.stringify(schedule));
             flushSessionStats(cur?.type === 'work');
@@ -2239,7 +2854,6 @@
             renderSchedule();
         }
 
-        // Clean Undo & Direct Selection without false 'skipped' strikethroughs
         function jumpToStep(index, isManualSelectOrUndo = false) {
             stopTimer(true, true);
             killActiveAlarms();
@@ -2277,7 +2891,7 @@
         });
 
         /* =========================================================================
-           6. DAILY TEMPLATE BUILDER (WITH TAP-TO-CYCLE TYPE & REORDER)
+           8. DAILY TEMPLATE BUILDER
            ========================================================================= */
         function updateDayTabs() {
             document.querySelectorAll('.day-tab-btn').forEach(btn => {
@@ -2326,22 +2940,14 @@
             });
         });
 
-        // Tap-to-Cycle Block Category (Study -> Deen -> Break -> Study)
         window.templateCycleType = function(index) {
             saveTemplateInputs();
             const item = weeklyTemplates[activeTemplateDay]?.[index];
             if (!item) return;
             haptic(15);
-            if (item.type === 'break') {
-                item.type = 'work';
-                item.category = 'study';
-            } else if (isDeenBlock(item)) {
-                item.type = 'break';
-                item.category = 'break';
-            } else {
-                item.type = 'work';
-                item.category = 'deen';
-            }
+            if (item.type === 'break') { item.type = 'work'; item.category = 'study'; }
+            else if (isDeenBlock(item)) { item.type = 'break'; item.category = 'break'; }
+            else { item.type = 'work'; item.category = 'deen'; }
             safeSet('pages_pomodoro_weekly_v8', JSON.stringify(weeklyTemplates));
             populateSettingsList();
             broadcastToCloud();
@@ -2438,7 +3044,7 @@
         });
 
         /* =========================================================================
-           7. STUDY / DEEN BALANCE HUD, SALAH TRACKER & DRIFT WARNING
+           9. STUDY / DEEN BALANCE HUD, SALAH TRACKER & DRIFT WARNING
            ========================================================================= */
         function getTodayStudyMinutes() {
             const today = getLocalTodayString();
@@ -2476,6 +3082,7 @@
             const mgDays = Math.max(0, calcDaysRemaining(extConfig.mainGoal.targetDate));
             document.getElementById('header-goal-name').textContent = `🎯 ${extConfig.mainGoal.title}`;
             document.getElementById('header-goal-days').textContent = `${mgDays}d left`;
+            updateTopBarRpgBadge();
         }
 
         document.getElementById('quick-add-deen-15-btn').addEventListener('click', () => {
@@ -2487,7 +3094,7 @@
             renderCompassView();
             evaluateDriftAndAlerts();
             broadcastToCloud();
-            showToast("🕌 +15 mins Deen & Imaan logged!");
+            showToast("🕌 +15 mins Deen & Imaan logged (+225 XP)!");
         });
 
         document.getElementById('open-targets-modal-btn').addEventListener('click', () => {
@@ -2521,14 +3128,15 @@
             if (!stats.history[today]) stats.history[today] = { mins: 0, sessions: 0 };
             stats.history[today].mins += 30;
             safeSet('pages_pomodoro_stats_v8', JSON.stringify(stats));
+            PomoEventBus.emit('stats:updated');
             renderHomeHUD(); renderStats(); broadcastToCloud();
-            showToast("+30m Study Added");
+            showToast("+30m Study Added (+300 XP)");
         });
         document.getElementById('manual-deen-add15').addEventListener('click', () => {
             const today = getLocalTodayString();
             deenHistory[today] = (deenHistory[today] || 0) + 15;
             saveExtConfig(); renderHomeHUD(); broadcastToCloud();
-            showToast("+15m Deen Added");
+            showToast("+15m Deen Added (+225 XP)");
         });
         document.getElementById('manual-deen-minus15').addEventListener('click', () => {
             const today = getLocalTodayString();
@@ -2796,7 +3404,7 @@
         });
 
         /* =========================================================================
-           8. 3-TIER LIFE COMPASS & IN-APP DD/MM/YYYY <-> DAYS COUNTDOWN MODAL
+           10. 3-TIER LIFE COMPASS & IN-APP DD/MM/YYYY <-> DAYS COUNTDOWN MODAL
            ========================================================================= */
         function getSmartGoalSuggestion(daysLeft, isMain = false) {
             const studyTarget = extConfig.studyTargetHours || 8.0;
@@ -2873,14 +3481,11 @@
         document.getElementById('edit-main-goal-btn').addEventListener('click', () => openGoalModal('main-goal'));
         document.getElementById('add-side-goal-btn').addEventListener('click', () => openGoalModal('side-add'));
 
-        /* In-App Date (DD/MM/YYYY) <-> Countdown Days Modal Controller */
         let modalContextMode = 'main-goal';
         let modalEditIndex = -1;
         let pDay = 15, pMonth = 5, pYear = 2027, pDaysBuffer = "210";
 
-        function maxDaysInMonth(m, y) {
-            return new Date(y, m, 0).getDate();
-        }
+        function maxDaysInMonth(m, y) { return new Date(y, m, 0).getDate(); }
 
         function syncPickerFromISO(isoStr) {
             const parts = (isoStr || addDaysToTodayISO(30)).split('-').map(Number);
@@ -2926,7 +3531,6 @@
             const descInp = document.getElementById('modal-goal-desc-input');
             const heading = document.getElementById('goal-modal-heading');
 
-            // Default visibility
             descWrap.classList.add('hidden');
             dateSection.classList.remove('hidden');
             clearDateBtn.classList.add('hidden');
@@ -2951,7 +3555,7 @@
                 heading.textContent = "🕌 Edit Lifelong Deen Purpose (∞)";
                 titleWrap.classList.remove('hidden');
                 descWrap.classList.remove('hidden');
-                dateSection.classList.add('hidden'); // Eternal purpose has no deadline
+                dateSection.classList.add('hidden');
                 titleInp.value = extConfig.deenPurpose.title;
                 descInp.value = extConfig.deenPurpose.desc || "";
             } else if (mode === 'todo-new-due') {
@@ -2965,6 +3569,15 @@
                 clearDateBtn.classList.remove('hidden');
                 const t = todos.find(x => x.id === activeDetailTodoId);
                 syncPickerFromISO((t && t.dueDate) ? t.dueDate : getLocalTodayString());
+            } else if (mode === 'bridge-start-date') {
+                heading.textContent = "📆 Select Start / Plan Date";
+                titleWrap.classList.add('hidden');
+                syncPickerFromISO(bridgeStartDate || getLocalTodayString());
+            } else if (mode === 'bridge-due-date') {
+                heading.textContent = "📅 Select Due Date";
+                titleWrap.classList.add('hidden');
+                clearDateBtn.classList.remove('hidden');
+                syncPickerFromISO(bridgeDueDate || getLocalTodayString());
             }
 
             document.getElementById('goal-date-modal').classList.remove('hidden');
@@ -2974,7 +3587,6 @@
             document.getElementById('goal-date-modal').classList.add('hidden');
         });
 
-        // Clear Date Button for To-Do Tasks
         document.getElementById('clear-goal-date-btn').addEventListener('click', () => {
             haptic(15);
             if (modalContextMode === 'todo-new-due') {
@@ -2988,9 +3600,12 @@
                     saveTodos();
                     renderTodos();
                 }
+            } else if (modalContextMode === 'bridge-due-date') {
+                bridgeDueDate = '';
+                document.getElementById('bridge-due-date-label').textContent = 'Not Set';
             }
             document.getElementById('goal-date-modal').classList.add('hidden');
-            showToast("Due Date Cleared");
+            showToast("Date Cleared");
         });
 
         document.getElementById('dd-minus-btn').addEventListener('click', () => {
@@ -3037,19 +3652,11 @@
             btn.addEventListener('click', (e) => {
                 haptic(12);
                 const key = e.currentTarget.getAttribute('data-key');
-                if (key === 'CLR') {
-                    pDaysBuffer = '0';
-                    numpadFreshOpen = false;
-                } else if (key === 'BS') {
-                    pDaysBuffer = pDaysBuffer.length > 1 ? pDaysBuffer.slice(0, -1) : '0';
-                    numpadFreshOpen = false;
-                } else {
-                    if (numpadFreshOpen || pDaysBuffer === '0') {
-                        pDaysBuffer = key;
-                        numpadFreshOpen = false;
-                    } else if (pDaysBuffer.length < 4) {
-                        pDaysBuffer += key;
-                    }
+                if (key === 'CLR') { pDaysBuffer = '0'; numpadFreshOpen = false; }
+                else if (key === 'BS') { pDaysBuffer = pDaysBuffer.length > 1 ? pDaysBuffer.slice(0, -1) : '0'; numpadFreshOpen = false; }
+                else {
+                    if (numpadFreshOpen || pDaysBuffer === '0') { pDaysBuffer = key; numpadFreshOpen = false; }
+                    else if (pDaysBuffer.length < 4) { pDaysBuffer += key; }
                 }
                 syncPickerFromDays(parseInt(pDaysBuffer) || 0);
             });
@@ -3104,6 +3711,12 @@
                     saveTodos();
                     renderTodos();
                 }
+            } else if (modalContextMode === 'bridge-start-date') {
+                bridgeStartDate = iso;
+                document.getElementById('bridge-start-date-label').textContent = formatDDMMYYYY(iso);
+            } else if (modalContextMode === 'bridge-due-date') {
+                bridgeDueDate = iso;
+                document.getElementById('bridge-due-date-label').textContent = formatDDMMYYYY(iso);
             }
 
             numpadFreshOpen = true;
@@ -3111,10 +3724,8 @@
         });
 
         /* =========================================================================
-           9. MICROSOFT TO DO + CUSTOM REPEATING + IN-APP NEW LIST MODAL
+           11. MICROSOFT TO DO (GRID VIEW + PROTOCOL BRIDGE + 6M LINE GRAPH)
            ========================================================================= */
-        let todos = JSON.parse(safeGet('pages_pomodoro_todos_v9', '[]'));
-        let todoLists = JSON.parse(safeGet('pages_pomodoro_todolists_v9', '[]'));
         let activeTodoList = 'myday';
         let newTodoDue = '';
         let newTodoRepeat = null;
@@ -3123,11 +3734,186 @@
         let showCompletedTodos = true;
         let activeDetailTodoId = null;
         let repeatModalTarget = 'new';
+        let todoViewMode = safeGet('pages_pomodoro_todo_view_v9', 'grid'); // 'grid' | 'list'
+        let activeTodoGraphRange = '7d'; // '7d' | '4w' | '6m'
+        let customModalPurpose = 'todolist'; // 'todolist' | 'subject'
 
         function saveTodos() {
             safeSet('pages_pomodoro_todos_v9', JSON.stringify(todos));
             safeSet('pages_pomodoro_todolists_v9', JSON.stringify(todoLists));
+            safeSet('pages_pomodoro_todo_hist_v9', JSON.stringify(todoCompletionHistory));
+            PomoEventBus.emit('todos:updated');
             broadcastToCloud();
+        }
+
+        // Toggle Grid vs List View
+        function applyTodoViewModeUI() {
+            const actCont = document.getElementById('todo-active-container');
+            const icon = document.getElementById('todo-view-mode-icon');
+            const txt = document.getElementById('todo-view-mode-text');
+            if (!actCont) return;
+            if (todoViewMode === 'grid') {
+                actCont.classList.add('todo-grid-mode');
+                if (icon) icon.textContent = '🔲';
+                if (txt) txt.textContent = 'Grid';
+            } else {
+                actCont.classList.remove('todo-grid-mode');
+                if (icon) icon.textContent = '☰';
+                if (txt) txt.textContent = 'List';
+            }
+        }
+        document.getElementById('todo-view-mode-btn')?.addEventListener('click', () => {
+            haptic(15);
+            todoViewMode = (todoViewMode === 'grid') ? 'list' : 'grid';
+            safeSet('pages_pomodoro_todo_view_v9', todoViewMode);
+            applyTodoViewModeUI();
+            renderTodos();
+        });
+
+        // Toggle To-Do Analytics & Line Graph Panel
+        document.getElementById('todo-analytics-toggle-btn')?.addEventListener('click', () => {
+            haptic(15);
+            const panel = document.getElementById('todo-analytics-panel');
+            panel.classList.toggle('hidden');
+            panel.classList.toggle('flex');
+            if (!panel.classList.contains('hidden')) renderTodoAnalytics();
+        });
+
+        document.querySelectorAll('.todo-graph-range-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                haptic(12);
+                activeTodoGraphRange = e.currentTarget.getAttribute('data-range');
+                document.querySelectorAll('.todo-graph-range-btn').forEach(b => {
+                    b.className = b.getAttribute('data-range') === activeTodoGraphRange
+                        ? "todo-graph-range-btn bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg"
+                        : "todo-graph-range-btn text-slate-400 text-[10px] font-bold px-2.5 py-1 rounded-lg";
+                });
+                renderTodoAnalytics();
+            });
+        });
+
+        function getTodoCompletedCountForDate(isoDate) {
+            const explicitHist = todoCompletionHistory[isoDate] || 0;
+            const byTaskStamp = todos.filter(t => t.completed && t.completedAt === isoDate).length;
+            return Math.max(explicitHist, byTaskStamp);
+        }
+
+        function renderTodoAnalytics() {
+            const box = document.getElementById('todo-line-graph-box');
+            if (!box) return;
+
+            let sum1W = 0, sum4W = 0, sumPrev4W = 0, sum6M = 0;
+            for (let i = 0; i < 180; i++) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const iso = getLocalTodayString(d);
+                const cnt = getTodoCompletedCountForDate(iso);
+                if (i < 7) sum1W += cnt;
+                if (i < 28) sum4W += cnt;
+                if (i >= 28 && i < 56) sumPrev4W += cnt;
+                sum6M += cnt;
+            }
+
+            // Fallback if tasks were completed before date-stamping was added
+            const totalCompletedAll = todos.filter(t => t.completed).length;
+            if (sum6M < totalCompletedAll) {
+                sum1W = Math.max(sum1W, totalCompletedAll);
+                sum4W = Math.max(sum4W, totalCompletedAll);
+                sum6M = Math.max(sum6M, totalCompletedAll);
+            }
+
+            document.getElementById('todo-stat-1w').textContent = sum1W;
+            document.getElementById('todo-stat-1w-sub').textContent = `${(sum1W / 7).toFixed(1)}/day avg`;
+            document.getElementById('todo-stat-4w').textContent = sum4W;
+            document.getElementById('todo-stat-4w-sub').textContent = `Weeks 1–4`;
+            document.getElementById('todo-stat-prev4w').textContent = sumPrev4W;
+            const diff4W = sum4W - sumPrev4W;
+            document.getElementById('todo-stat-prev4w-sub').textContent = diff4W >= 0 ? `+${diff4W} vs Wks 5–8` : `${diff4W} vs Wks 5–8`;
+            document.getElementById('todo-stat-6m').textContent = sum6M;
+
+            // Build Data Points for SVG Line Graph
+            let points = [];
+            if (activeTodoGraphRange === '7d') {
+                document.getElementById('todo-graph-title').textContent = "1-Week Daily Completion Line Graph (Last 7 Days)";
+                for (let i = 6; i >= 0; i--) {
+                    const d = new Date();
+                    d.setDate(d.getDate() - i);
+                    const iso = getLocalTodayString(d);
+                    points.push({
+                        label: i === 0 ? 'Today' : d.toLocaleDateString('en-US', { weekday: 'short' }),
+                        val: getTodoCompletedCountForDate(iso)
+                    });
+                }
+            } else if (activeTodoGraphRange === '4w') {
+                document.getElementById('todo-graph-title').textContent = "4-Week vs. Earlier 4-Week Progression (8 Weekly Buckets)";
+                for (let w = 7; w >= 0; w--) {
+                    let wSum = 0;
+                    for (let d = 0; d < 7; d++) {
+                        const dt = new Date();
+                        dt.setDate(dt.getDate() - (w * 7 + d));
+                        wSum += getTodoCompletedCountForDate(getLocalTodayString(dt));
+                    }
+                    points.push({ label: w === 0 ? 'This Wk' : `W-${w}`, val: wSum });
+                }
+            } else {
+                document.getElementById('todo-graph-title').textContent = "6-Month Trajectory Line Graph (6 Monthly Buckets)";
+                for (let m = 5; m >= 0; m--) {
+                    let mSum = 0;
+                    const refDate = new Date();
+                    refDate.setMonth(refDate.getMonth() - m);
+                    const mLabel = refDate.toLocaleDateString('en-US', { month: 'short' });
+                    for (let d = 0; d < 30; d++) {
+                        const dt = new Date();
+                        dt.setDate(dt.getDate() - (m * 30 + d));
+                        mSum += getTodoCompletedCountForDate(getLocalTodayString(dt));
+                    }
+                    points.push({ label: mLabel, val: mSum });
+                }
+            }
+
+            const pctDelta = sumPrev4W > 0 ? Math.round(((sum4W - sumPrev4W) / sumPrev4W) * 100) : (sum4W > 0 ? 100 : 0);
+            const deltaBadge = document.getElementById('todo-graph-delta-badge');
+            deltaBadge.textContent = `${pctDelta >= 0 ? '+' : ''}${pctDelta}% (4W vs Earlier 4W)`;
+            deltaBadge.className = `text-[10px] font-mono font-bold ${pctDelta >= 0 ? 'text-emerald-400' : 'text-amber-400'}`;
+
+            // Render SVG Line Graph
+            const W = 520, H = 135, padL = 28, padR = 24, padT = 22, padB = 26;
+            const maxVal = Math.max(4, ...points.map(p => p.val));
+            const plotW = W - padL - padR;
+            const plotH = H - padT - padB;
+
+            const coords = points.map((p, idx) => {
+                const x = padL + (points.length > 1 ? (idx / (points.length - 1)) * plotW : plotW / 2);
+                const y = padT + plotH - ((p.val / maxVal) * plotH);
+                return { x, y, label: p.label, val: p.val };
+            });
+
+            const polyPoints = coords.map(c => `${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ');
+            const areaPoints = `${coords[0].x.toFixed(1)},${padT + plotH} ${polyPoints} ${coords[coords.length - 1].x.toFixed(1)},${padT + plotH}`;
+
+            box.innerHTML = `
+                <svg viewBox="0 0 ${W} ${H}" class="w-full h-full overflow-visible">
+                    <defs>
+                        <linearGradient id="todoLineArea" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.42"/>
+                            <stop offset="100%" stop-color="#10b981" stop-opacity="0.0"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- Grid Lines -->
+                    <line x1="${padL}" y1="${padT}" x2="${W - padR}" y2="${padT}" stroke="#1e293b" stroke-dasharray="3 3" stroke-width="1"/>
+                    <line x1="${padL}" y1="${padT + plotH / 2}" x2="${W - padR}" y2="${padT + plotH / 2}" stroke="#1e293b" stroke-dasharray="3 3" stroke-width="1"/>
+                    <line x1="${padL}" y1="${padT + plotH}" x2="${W - padR}" y2="${padT + plotH}" stroke="#334155" stroke-width="1"/>
+                    <!-- Shaded Area & Line -->
+                    <polygon points="${areaPoints}" fill="url(#todoLineArea)"/>
+                    <polyline fill="none" stroke="#38bdf8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="${polyPoints}"/>
+                    <!-- Data Nodes & Labels -->
+                    ${coords.map((c, idx) => `
+                        <circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="${idx === coords.length - 1 ? 5 : 3.8}" fill="${idx === coords.length - 1 ? '#34d399' : '#3b82f6'}" stroke="#020617" stroke-width="1.5"/>
+                        <text x="${c.x.toFixed(1)}" y="${(c.y - 7).toFixed(1)}" fill="#e2e8f0" font-size="10" font-family="monospace" font-weight="bold" text-anchor="middle">${c.val}</text>
+                        <text x="${c.x.toFixed(1)}" y="${H - 6}" fill="#94a3b8" font-size="10" font-weight="bold" text-anchor="middle">${c.label}</text>
+                    `).join('')}
+                </svg>
+            `;
         }
 
         function formatRepeatBadge(rep) {
@@ -3216,6 +4002,8 @@
             addListBtn.textContent = "➕ New List";
             addListBtn.onclick = () => {
                 haptic(15);
+                customModalPurpose = 'todolist';
+                document.getElementById('new-todolist-modal-title').textContent = '📁 Create Custom List';
                 document.getElementById('new-todolist-name-input').value = '';
                 document.getElementById('new-todolist-modal').classList.remove('hidden');
             };
@@ -3227,18 +4015,31 @@
         });
         document.getElementById('confirm-new-todolist-btn').addEventListener('click', () => {
             const name = document.getElementById('new-todolist-name-input').value.trim();
-            if (!name) { showToast("Enter a list name", true); return; }
-            const id = 'list_' + Date.now();
-            todoLists.push({ id, name });
-            activeTodoList = id;
-            saveTodos();
-            renderTodoListsBar();
-            renderTodos();
+            if (!name) { showToast("Enter a name", true); return; }
+            if (customModalPurpose === 'subject') {
+                if (!extConfig.customSubjects.includes(name)) {
+                    extConfig.customSubjects.push(name);
+                    activeTaskSubj = name;
+                    saveExtConfig();
+                    renderCustomSubjectBar();
+                    renderTasks(activeTaskTab);
+                    broadcastToCloud();
+                    showToast(`Subject "${name}" added!`);
+                }
+            } else {
+                const id = 'list_' + Date.now();
+                todoLists.push({ id, name });
+                activeTodoList = id;
+                saveTodos();
+                renderTodoListsBar();
+                renderTodos();
+                showToast(`List "${name}" created!`);
+            }
             document.getElementById('new-todolist-modal').classList.add('hidden');
-            showToast(`List "${name}" created!`);
         });
 
         function renderTodos() {
+            applyTodoViewModeUI();
             const today = getLocalTodayString();
             const dObj = new Date();
             document.getElementById('todo-header-date').textContent = dObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
@@ -3265,6 +4066,7 @@
             const actCont = document.getElementById('todo-active-container');
             actCont.innerHTML = '';
             if (activeTasks.length === 0) {
+                actCont.classList.remove('todo-grid-mode');
                 actCont.innerHTML = `<p class="text-xs text-slate-500 italic text-center p-4 bg-slate-900/40 rounded-xl border border-slate-800/50">No active tasks in this view. Add one above!</p>`;
             } else {
                 activeTasks.forEach(t => actCont.appendChild(createTodoRow(t)));
@@ -3283,6 +4085,9 @@
                     completedTasks.forEach(t => compCont.appendChild(createTodoRow(t)));
                 }
             }
+            if (!document.getElementById('todo-analytics-panel')?.classList.contains('hidden')) {
+                renderTodoAnalytics();
+            }
         }
 
         function createTodoRow(t) {
@@ -3291,26 +4096,32 @@
             const stepsDone = (t.steps || []).filter(s => s.done).length;
             const stepsTot = (t.steps || []).length;
             const repText = formatRepeatBadge(t.repeat);
+            const durBadge = t.durationMins ? `<span class="text-[10px] text-cyan-400 font-mono">⏱️ ${t.durationMins}m ${t.category === 'deen' ? '🕌' : '🧠'}</span>` : '';
 
             div.onclick = () => openTodoDetail(t.id);
             div.innerHTML = `
-                <div class="flex items-center gap-3 min-w-0 flex-1 pr-2">
+                <div class="flex items-center gap-2.5 min-w-0 flex-1 pr-2">
                     <button onclick="event.stopPropagation(); toggleTodoComplete(${t.id})" class="todo-check-circle ${t.completed ? 'checked' : ''}">
                         ${t.completed ? '✓' : ''}
                     </button>
                     <div class="min-w-0 flex-1">
                         <p class="text-xs sm:text-sm font-bold truncate ${t.completed ? 'line-through text-slate-500' : 'text-slate-100'}">${escapeHtml(t.title)}</p>
-                        <div class="flex flex-wrap items-center gap-2 mt-0.5">
+                        <div class="flex flex-wrap items-center gap-1.5 mt-0.5">
                             ${t.myDayDate === getLocalTodayString() ? '<span class="text-[10px] text-blue-400 font-semibold">☀️ My Day</span>' : ''}
                             ${t.dueDate ? `<span class="text-[10px] text-emerald-400 font-mono">📅 ${formatDDMMYYYY(t.dueDate)}</span>` : ''}
+                            ${durBadge}
                             ${repText ? `<span class="text-[10px] text-purple-400 font-semibold">${escapeHtml(repText)}</span>` : ''}
                             ${stepsTot > 0 ? `<span class="text-[10px] text-slate-400 font-mono">☑️ ${stepsDone}/${stepsTot}</span>` : ''}
                         </div>
                     </div>
                 </div>
-                <button onclick="event.stopPropagation(); toggleTodoImportant(${t.id})" class="text-base px-1.5 ${t.important ? 'text-amber-400' : 'text-slate-600'}">
-                    ${t.important ? '★' : '☆'}
-                </button>
+                <div class="flex items-center gap-1 shrink-0">
+                    <!-- Protocol / Run Button right next to Important Star -->
+                    <button onclick="event.stopPropagation(); openProtocolBridge('todo', ${t.id})" class="bg-blue-600/20 hover:bg-blue-600/40 text-blue-300 border border-blue-500/40 px-2 py-1 rounded-lg text-xs font-bold active:scale-90" title="Send to Live Protocol or Run Timer">⚡</button>
+                    <button onclick="event.stopPropagation(); toggleTodoImportant(${t.id})" class="text-base px-1.5 ${t.important ? 'text-amber-400' : 'text-slate-600'}" title="Mark Important">
+                        ${t.important ? '★' : '☆'}
+                    </button>
+                </div>
             `;
             return div;
         }
@@ -3319,26 +4130,34 @@
             haptic(20);
             const t = todos.find(x => x.id === id);
             if (!t) return;
+            const today = getLocalTodayString();
             t.completed = !t.completed;
             if (t.completed) {
+                t.completedAt = today;
+                todoCompletionHistory[today] = (todoCompletionHistory[today] || 0) + 1;
                 playChime('todo');
                 if (t.repeat && t.repeat.type && t.repeat.type !== 'none' && !t._spawnedNext) {
                     t._spawnedNext = true;
-                    const nextDue = computeNextDueDate(t.dueDate || getLocalTodayString(), t.repeat);
+                    const nextDue = computeNextDueDate(t.dueDate || today, t.repeat);
                     todos.unshift({
                         id: Date.now() + Math.floor(Math.random() * 100),
                         title: t.title,
                         completed: false,
                         important: t.important,
-                        myDayDate: nextDue === getLocalTodayString() ? nextDue : '',
+                        myDayDate: nextDue === today ? nextDue : '',
                         dueDate: nextDue,
                         repeat: JSON.parse(JSON.stringify(t.repeat)),
                         steps: (t.steps || []).map(s => ({ ...s, done: false })),
                         note: t.note || '',
+                        durationMins: t.durationMins,
+                        category: t.category,
                         listId: t.listId || 'tasks'
                     });
                     showToast(`🔁 Next occurrence scheduled for ${formatDDMMYYYY(nextDue)}`);
                 }
+            } else {
+                t.completedAt = '';
+                todoCompletionHistory[today] = Math.max(0, (todoCompletionHistory[today] || 1) - 1);
             }
             saveTodos();
             renderTodos();
@@ -3413,7 +4232,6 @@
             renderTodos();
         });
 
-        /* Custom Repeat Builder Modal Logic */
         let customRepInterval = 1;
         let customRepDays = [];
 
@@ -3478,7 +4296,6 @@
             }
         }
 
-        /* Task Detail Drawer & Subtasks */
         function openTodoDetail(id) {
             activeDetailTodoId = id;
             const t = todos.find(x => x.id === id);
@@ -3491,6 +4308,10 @@
             renderDetailSteps();
             document.getElementById('todo-detail-modal').classList.remove('hidden');
         }
+
+        document.getElementById('detail-protocol-bridge-btn')?.addEventListener('click', () => {
+            if (activeDetailTodoId) openProtocolBridge('todo', activeDetailTodoId);
+        });
 
         function renderDetailSteps() {
             const t = todos.find(x => x.id === activeDetailTodoId);
@@ -3566,7 +4387,6 @@
             document.getElementById('todo-detail-modal').classList.add('hidden');
         });
 
-        /* My Day Suggestions Modal */
         document.getElementById('todo-suggestions-btn').addEventListener('click', () => {
             const cont = document.getElementById('suggestions-list-container');
             const today = getLocalTodayString();
@@ -3601,9 +4421,50 @@
         });
 
         /* =========================================================================
-           10. EXISTING NEET VAULT, STATS, TELEGRAM & FACTORY RESET
+           12. STUDY VAULT (WITH PROTOCOL/RUN BRIDGE & COMPLETED SECTION)
            ========================================================================= */
         let activeTaskTab = 'backlog', activeTaskSubj = 'Physics';
+        let showCompletedVault = true;
+
+        function renderCustomSubjectBar() {
+            const bar = document.getElementById('subject-filter-container');
+            if (!bar) return;
+            const subjects = extConfig.customSubjects || ['Physics', 'Chemistry', 'Biology'];
+            if (!subjects.includes(activeTaskSubj)) activeTaskSubj = subjects[0];
+
+            bar.innerHTML = `<input type="hidden" id="active-subject-input" value="${escapeHtml(activeTaskSubj)}">`;
+            subjects.forEach(subj => {
+                const btn = document.createElement('button');
+                const isAct = activeTaskSubj === subj;
+                btn.className = isAct
+                    ? "subj-btn active flex-1 min-w-[75px] bg-slate-700 text-white border border-slate-500 font-bold py-2 px-2.5 rounded-lg text-xs transition-all shadow-sm whitespace-nowrap"
+                    : "subj-btn flex-1 min-w-[75px] bg-slate-900 text-slate-400 border border-slate-800 font-bold py-2 px-2.5 rounded-lg text-xs transition-all whitespace-nowrap";
+                btn.textContent = subj;
+                btn.onclick = () => {
+                    activeTaskSubj = subj;
+                    renderCustomSubjectBar();
+                    if (activeTaskTab === 'mcq') {
+                        document.getElementById('mcq-subject-title').textContent = `${activeTaskSubj} Daily Target`;
+                        loadMCQInputs();
+                    }
+                    renderTasks(activeTaskTab);
+                };
+                bar.appendChild(btn);
+            });
+
+            const addSubjBtn = document.createElement('button');
+            addSubjBtn.className = "bg-slate-950 text-emerald-400 border border-slate-800 font-bold py-2 px-2.5 rounded-lg text-xs whitespace-nowrap active:scale-95";
+            addSubjBtn.textContent = "＋ Subj";
+            addSubjBtn.onclick = () => {
+                haptic(15);
+                customModalPurpose = 'subject';
+                document.getElementById('new-todolist-modal-title').textContent = '📚 Add Study Subject';
+                document.getElementById('new-todolist-name-input').value = '';
+                document.getElementById('new-todolist-modal').classList.remove('hidden');
+            };
+            bar.appendChild(addSubjBtn);
+        }
+
         document.querySelectorAll('.task-tab').forEach(tab => {
             tab.addEventListener('click', (e) => {
                 activeTaskTab = e.currentTarget.getAttribute('data-tab');
@@ -3621,41 +4482,67 @@
             });
         });
 
-        document.querySelectorAll('.subj-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                activeTaskSubj = e.currentTarget.getAttribute('data-subj');
-                document.getElementById('active-subject-input').value = activeTaskSubj;
-                document.querySelectorAll('.subj-btn').forEach(b => b.className = "subj-btn flex-1 bg-slate-900 text-slate-400 border border-slate-800 font-bold py-2 rounded-lg text-xs transition-all");
-                e.currentTarget.className = "subj-btn active flex-1 bg-slate-700 text-white border border-slate-600 font-bold py-2 rounded-lg text-xs transition-all shadow-sm";
-                if (activeTaskTab === 'mcq') { document.getElementById('mcq-subject-title').textContent = `${activeTaskSubj} Daily Target`; loadMCQInputs(); }
-                renderTasks(activeTaskTab);
-            });
-        });
-
-        document.getElementById('add-task-btn').addEventListener('click', () => {
+        function addVaultTask(openBridgeAfter = false) {
             const titleInput = document.getElementById('task-title-input');
             const title = titleInput.value.trim();
-            if (!title) return;
+            if (!title) { showToast("Enter chapter or topic name", true); return; }
             const tasks = JSON.parse(safeGet('pages_pomodoro_tasks_v8', '[]'));
-            tasks.push({ id: Date.now(), title, subject: activeTaskSubj, type: activeTaskTab, completed: false });
+            const newId = Date.now();
+            tasks.push({
+                id: newId,
+                title,
+                subject: activeTaskSubj,
+                type: activeTaskTab,
+                completed: false,
+                durationMins: 50,
+                category: 'study',
+                startDate: getLocalTodayString(),
+                dueDate: '',
+                note: ''
+            });
             safeSet('pages_pomodoro_tasks_v8', JSON.stringify(tasks));
             titleInput.value = '';
+            PomoEventBus.emit('vault:updated');
             renderTasks(activeTaskTab);
             broadcastToCloud();
-        });
+            if (openBridgeAfter) {
+                openProtocolBridge('vault', newId);
+            } else {
+                showToast("Added to Study Vault!");
+            }
+        }
+
+        document.getElementById('add-task-btn').addEventListener('click', () => addVaultTask(false));
+        document.getElementById('add-and-bridge-vault-btn')?.addEventListener('click', () => addVaultTask(true));
 
         window.toggleTask = function(id) {
+            haptic(20);
             const tasks = JSON.parse(safeGet('pages_pomodoro_tasks_v8', '[]'));
             const t = tasks.find(x => x.id === id);
-            if (t) { t.completed = !t.completed; safeSet('pages_pomodoro_tasks_v8', JSON.stringify(tasks)); renderTasks(activeTaskTab); broadcastToCloud(); }
+            if (t) {
+                t.completed = !t.completed;
+                t.completedAt = t.completed ? getLocalTodayString() : '';
+                if (t.completed) playChime('todo');
+                safeSet('pages_pomodoro_tasks_v8', JSON.stringify(tasks));
+                PomoEventBus.emit('vault:updated');
+                renderTasks(activeTaskTab);
+                broadcastToCloud();
+            }
         };
         window.deleteTask = function(id) {
             let tasks = JSON.parse(safeGet('pages_pomodoro_tasks_v8', '[]'));
             tasks = tasks.filter(x => x.id !== id);
             safeSet('pages_pomodoro_tasks_v8', JSON.stringify(tasks));
+            PomoEventBus.emit('vault:updated');
             renderTasks(activeTaskTab);
             broadcastToCloud();
         };
+
+        document.getElementById('vault-completed-toggle')?.addEventListener('click', () => {
+            showCompletedVault = !showCompletedVault;
+            document.getElementById('vault-completed-arrow').textContent = showCompletedVault ? '▼' : '▶';
+            renderTasks(activeTaskTab);
+        });
 
         function loadMCQInputs() {
             const mcqs = JSON.parse(safeGet('pages_pomodoro_mcq_v8', '{}'));
@@ -3688,15 +4575,49 @@
             broadcastToCloud();
         });
 
+        function createVaultCard(task) {
+            const div = document.createElement('div');
+            div.className = `flex flex-col gap-1.5 p-3 rounded-xl border transition-all ${task.completed ? 'bg-slate-950/60 border-slate-900 opacity-55' : 'bg-slate-900 border-slate-800'}`;
+            const durText = task.durationMins ? `<span class="text-[10px] text-cyan-400 font-mono">⏱️ ${task.durationMins}m</span>` : '';
+            const startText = task.startDate ? `<span class="text-[10px] text-blue-400 font-mono">📆 ${formatDDMMYYYY(task.startDate)}</span>` : '';
+            const dueText = task.dueDate ? `<span class="text-[10px] text-emerald-400 font-mono">📅 Due ${formatDDMMYYYY(task.dueDate)}</span>` : '';
+            const noteText = task.note ? `<p class="text-[10px] text-slate-400 italic truncate">📝 ${escapeHtml(task.note)}</p>` : '';
+
+            div.innerHTML = `
+                <div class="flex justify-between items-center gap-2">
+                    <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                        <button onclick="toggleTask(${task.id})" class="w-5 h-5 rounded-md border flex items-center justify-center shrink-0 ${task.completed ? 'bg-emerald-600 border-emerald-500 text-white' : 'border-slate-700 bg-slate-950'}">${task.completed ? '✓' : ''}</button>
+                        <div class="min-w-0 flex-1">
+                            <span class="text-xs sm:text-sm font-bold block truncate ${task.completed ? 'line-through text-slate-500' : 'text-slate-100'}">${escapeHtml(task.title)}</span>
+                            <div class="flex flex-wrap items-center gap-2 mt-0.5">${durText}${startText}${dueText}</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button onclick="openProtocolBridge('vault', ${task.id})" class="bg-blue-600 hover:bg-blue-500 text-white px-2.5 py-1.5 rounded-lg text-[10px] font-extrabold flex items-center gap-1 active:scale-95 shadow" title="Configure Duration, Date, Notes & Run Timer">
+                            <span>⚡</span> <span>Protocol / Run</span>
+                        </button>
+                        <button onclick="deleteTask(${task.id})" class="bg-slate-950 text-red-400 border border-slate-800 px-2 py-1.5 rounded-lg text-xs">🗑️</button>
+                    </div>
+                </div>
+                ${noteText}
+            `;
+            return div;
+        }
+
         function renderTasks(tab) {
             const container = document.getElementById('vault-list-container');
+            const compWrapper = document.getElementById('vault-completed-wrapper');
+            const compContainer = document.getElementById('vault-completed-container');
             if (!container) return;
             container.innerHTML = '';
+            if (compContainer) compContainer.innerHTML = '';
+
             if (tab === 'matrix') {
+                compWrapper?.classList.add('hidden');
                 const tasks = JSON.parse(safeGet('pages_pomodoro_tasks_v8', '[]'));
                 const mcqs = JSON.parse(safeGet('pages_pomodoro_mcq_v8', '{}'));
                 const today = getLocalTodayString();
-                ['Physics', 'Chemistry', 'Biology'].forEach(subj => {
+                (extConfig.customSubjects || ['Physics', 'Chemistry', 'Biology']).forEach(subj => {
                     const subT = tasks.filter(t => t.subject === subj);
                     const bTot = subT.filter(t => t.type === 'backlog').length;
                     const bDone = subT.filter(t => t.type === 'backlog' && t.completed).length;
@@ -3704,24 +4625,41 @@
                     const rDone = subT.filter(t => t.type === 'revision' && t.completed).length;
                     const mData = (mcqs[today] && mcqs[today][subj]) ? mcqs[today][subj] : { t: 0, a: 0, c: 0 };
                     const mInc = Math.max(0, mData.a - mData.c);
-                    container.innerHTML += `<div class="bg-slate-900 border border-slate-800 rounded-xl p-4 mb-2"><h4 class="text-xs font-bold text-white mb-2 uppercase tracking-widest">${subj}</h4><div class="grid grid-cols-2 gap-2 text-center mb-2"><div class="bg-slate-950 rounded-lg p-2"><p class="text-[9px] text-slate-400 uppercase tracking-wider mb-0.5">Backlogs Left</p><p class="text-sm font-bold">${bTot - bDone}</p></div><div class="bg-slate-950 rounded-lg p-2"><p class="text-[9px] text-slate-400 uppercase tracking-wider mb-0.5">Revision Left</p><p class="text-sm font-bold">${rTot - rDone}</p></div></div><div class="bg-slate-950 rounded-lg p-2 text-center flex justify-between"><div class="text-[8px] text-slate-400 uppercase">Tar<br><b class="text-xs text-white">${mData.t}</b></div><div class="text-[8px] text-slate-400 uppercase">Att<br><b class="text-xs text-blue-400">${mData.a}</b></div><div class="text-[8px] text-slate-400 uppercase">Cor<br><b class="text-xs text-emerald-400">${mData.c}</b></div><div class="text-[8px] text-slate-400 uppercase">Wr<br><b class="text-xs text-tomato">${mInc}</b></div></div></div>`;
+                    container.innerHTML += `<div class="bg-slate-900 border border-slate-800 rounded-xl p-4 mb-2"><h4 class="text-xs font-bold text-white mb-2 uppercase tracking-widest">${escapeHtml(subj)}</h4><div class="grid grid-cols-2 gap-2 text-center mb-2"><div class="bg-slate-950 rounded-lg p-2"><p class="text-[9px] text-slate-400 uppercase tracking-wider mb-0.5">Backlogs Left</p><p class="text-sm font-bold">${bTot - bDone}</p></div><div class="bg-slate-950 rounded-lg p-2"><p class="text-[9px] text-slate-400 uppercase tracking-wider mb-0.5">Revision Left</p><p class="text-sm font-bold">${rTot - rDone}</p></div></div><div class="bg-slate-950 rounded-lg p-2 text-center flex justify-between"><div class="text-[8px] text-slate-400 uppercase">Tar<br><b class="text-xs text-white">${mData.t}</b></div><div class="text-[8px] text-slate-400 uppercase">Att<br><b class="text-xs text-blue-400">${mData.a}</b></div><div class="text-[8px] text-slate-400 uppercase">Cor<br><b class="text-xs text-emerald-400">${mData.c}</b></div><div class="text-[8px] text-slate-400 uppercase">Wr<br><b class="text-xs text-tomato">${mInc}</b></div></div></div>`;
                 });
                 return;
             }
-            if (tab === 'mcq') return;
-            const tasks = JSON.parse(safeGet('pages_pomodoro_tasks_v8', '[]')).filter(t => t.type === tab && t.subject === activeTaskSubj);
-            if (tasks.length === 0) {
-                container.innerHTML = `<p class="text-slate-500 italic p-4 text-xs text-center">No chapters found. Add above.</p>`;
+            if (tab === 'mcq') {
+                compWrapper?.classList.add('hidden');
                 return;
             }
-            tasks.forEach(task => {
-                const div = document.createElement('div');
-                div.className = `flex justify-between items-center p-3 rounded-xl border ${task.completed ? 'bg-slate-950 border-slate-900 opacity-50' : 'bg-slate-900 border-slate-800'}`;
-                div.innerHTML = `<div class="flex items-center gap-3 min-w-0 flex-1"><button onclick="toggleTask(${task.id})" class="w-5 h-5 rounded-md border flex items-center justify-center shrink-0 ${task.completed ? 'bg-emerald-600 border-emerald-500 text-white' : 'border-slate-700 bg-slate-950'}">${task.completed ? '✓' : ''}</button><span class="text-xs font-medium truncate ${task.completed ? 'line-through text-slate-500' : 'text-slate-200'}">${escapeHtml(task.title)}</span></div><button onclick="deleteTask(${task.id})" class="text-red-400 ml-2 text-xs">🗑️</button>`;
-                container.appendChild(div);
-            });
+
+            const allSubjTasks = JSON.parse(safeGet('pages_pomodoro_tasks_v8', '[]')).filter(t => t.type === tab && t.subject === activeTaskSubj);
+            const activeVault = allSubjTasks.filter(t => !t.completed);
+            const completedVault = allSubjTasks.filter(t => t.completed);
+
+            if (activeVault.length === 0) {
+                container.innerHTML = `<p class="text-slate-500 italic p-4 text-xs text-center bg-slate-900/40 rounded-xl border border-slate-800/50">No active ${tab} chapters in ${escapeHtml(activeTaskSubj)}. Add one above!</p>`;
+            } else {
+                activeVault.forEach(task => container.appendChild(createVaultCard(task)));
+            }
+
+            if (!compWrapper) return;
+            if (completedVault.length === 0) {
+                compWrapper.classList.add('hidden');
+            } else {
+                compWrapper.classList.remove('hidden');
+                compWrapper.classList.add('flex');
+                document.getElementById('vault-completed-count').textContent = completedVault.length;
+                if (showCompletedVault) {
+                    completedVault.forEach(task => compContainer.appendChild(createVaultCard(task)));
+                }
+            }
         }
 
+        /* =========================================================================
+           13. STATS, TELEGRAM & FACTORY RESET
+           ========================================================================= */
         function renderStats() {
             const stats = JSON.parse(safeGet('pages_pomodoro_stats_v8', '{"history":{}}'));
             const todayData = stats.history[getLocalTodayString()] || { mins: 0, sessions: 0 };
@@ -3737,7 +4675,6 @@
             document.getElementById('stat-weekly-total').textContent = `${weekMins}m`;
         }
 
-        /* Telegram Daily Report */
         async function sendTelegramMessage() {
             const token = safeGet('pages_pomodoro_tg_token', document.getElementById('tg-token-input').value.trim());
             const chatId = safeGet('pages_pomodoro_tg_chatid', document.getElementById('tg-chatid-input').value.trim());
@@ -3748,8 +4685,10 @@
             const salahScore = getTodaySalahDoneCount();
             const mgDays = Math.max(0, calcDaysRemaining(extConfig.mainGoal.targetDate));
             const compCount = schedule.filter(s => s.status === 'completed').length;
+            const rpg = calculateLifetimeRPGStats();
 
-            let text = `🩺 *POMO DAILY PROTOCOL REPORT* 🩺\n\n`;
+            let text = `🩺 *DEENTIMER DAILY PROTOCOL REPORT* 🩺\n\n`;
+            text += `${rpg.rankObj.badge} *Rank:* ${rpg.rankObj.title} (Lv.${rpg.level} • ${rpg.lifetimeXP} XP)\n`;
             text += `🎯 *${extConfig.mainGoal.title}:* ${mgDays} Days Left\n`;
             text += `🧠 *Study:* ${studyH}h / ${extConfig.studyTargetHours.toFixed(1)}h\n`;
             text += `🕌 *Deen & Imaan:* ${deenH}h / ${extConfig.deenTargetHours.toFixed(1)}h\n`;
@@ -3814,7 +4753,7 @@
         });
 
         /* =========================================================================
-           11. AUTOMATIC MIDNIGHT ROLL-OVER & BACKGROUND HEARTBEAT
+           14. AUTOMATIC MIDNIGHT ROLL-OVER & BACKGROUND HEARTBEAT
            ========================================================================= */
         let activeDayAnchor = getLocalTodayString();
         setInterval(() => {
@@ -3827,13 +4766,14 @@
                 renderCompassView();
                 renderTodos();
                 renderStats();
+                updateTopBarRpgBadge();
                 showToast("🌙 New Day Started! Countdowns & Salah Reset.");
             }
             evaluateDriftAndAlerts();
         }, 20000);
 
         /* =========================================================================
-           12. BOOTSTRAP & INITIALIZATION (CREDITS ELAPSED TIME ON APP RELOAD)
+           15. BOOTSTRAP & INITIALIZATION
            ========================================================================= */
         const savedStateRaw = safeGet('pages_pomodoro_app_state_v8', null);
         if (savedStateRaw && schedule.length > 0) {
@@ -3856,7 +4796,6 @@
                         startTimer(true);
                     } else {
                         const rem = Math.round((savedState.targetEndTime - Date.now()) / 1000);
-                        // Credit any study/deen seconds that elapsed while the app was closed/reloading
                         if (curSess?.type === 'work' && prevTimeLeft > Math.max(0, rem)) {
                             const elapsedWhileClosed = prevTimeLeft - Math.max(0, rem);
                             if (isDeenBlock(curSess)) accumulatedDeenTime += elapsedWhileClosed;
@@ -3894,10 +4833,11 @@
         renderHomeHUD();
         renderSalahStrip();
         renderCompassView();
+        renderCustomSubjectBar();
         renderTodoListsBar();
         renderTodos();
+        updateTopBarRpgBadge();
         evaluateDriftAndAlerts();
     </script>
 </body>
 </html>
-    
