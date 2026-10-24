@@ -19,14 +19,15 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: 3. Accept Android SDK Licenses (Built-in SDK)
+      - name: 3. Install SVG Renderer & Accept Android SDK Licenses
         run: |
+          sudo apt-get update && sudo apt-get install -y librsvg2-bin
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
-      - name: 4. Assemble Native Android Project & Embed index.html
+      - name: 4. Assemble Native Android Project, Icon & index.html
         run: |
           python3 - << 'PYEOF'
-          import os, shutil, textwrap
+          import os, shutil, subprocess, textwrap
 
           base = "android_build"
           dirs = [
@@ -35,6 +36,11 @@ jobs:
               f"{base}/app/src/main/res/layout",
               f"{base}/app/src/main/res/drawable",
               f"{base}/app/src/main/res/mipmap-anydpi-v26",
+              f"{base}/app/src/main/res/mipmap-mdpi",
+              f"{base}/app/src/main/res/mipmap-hdpi",
+              f"{base}/app/src/main/res/mipmap-xhdpi",
+              f"{base}/app/src/main/res/mipmap-xxhdpi",
+              f"{base}/app/src/main/res/mipmap-xxxhdpi",
               f"{base}/app/src/main/res/values",
           ]
           for d in dirs:
@@ -49,8 +55,74 @@ jobs:
               raise FileNotFoundError("index.html not found in repository root!")
 
           def write_file(path, content):
+              clean = content.replace("\u00a0", " ")
               with open(path, "w", encoding="utf-8") as f:
-                  f.write(textwrap.dedent(content).strip() + "\n")
+                  f.write(textwrap.dedent(clean).strip() + "\n")
+
+          # Clean Pro SVG Icon (Used to generate all Android mipmap PNGs)
+          pro_svg = """
+              <?xml version="1.0" encoding="UTF-8"?>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+              <defs>
+              <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#0f172a"/>
+              <stop offset="50%" stop-color="#020617"/>
+              <stop offset="100%" stop-color="#01030a"/>
+              </linearGradient>
+              <linearGradient id="caseGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#1e293b"/>
+              <stop offset="100%" stop-color="#090d16"/>
+              </linearGradient>
+              <linearGradient id="blueArc" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#38bdf8"/>
+              <stop offset="50%" stop-color="#3b82f6"/>
+              <stop offset="100%" stop-color="#6366f1"/>
+              </linearGradient>
+              <linearGradient id="deenArc" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#34d399"/>
+              <stop offset="100%" stop-color="#059669"/>
+              </linearGradient>
+              <linearGradient id="flameGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#ff7f50"/>
+              <stop offset="50%" stop-color="#ff4757"/>
+              <stop offset="100%" stop-color="#e11d48"/>
+              </linearGradient>
+              <linearGradient id="coreGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#fef08a"/>
+              <stop offset="100%" stop-color="#f59e0b"/>
+              </linearGradient>
+              </defs>
+              <rect width="512" height="512" rx="115" fill="url(#bgGrad)"/>
+              <rect x="240" y="76" width="32" height="32" fill="#475569"/>
+              <rect x="212" y="52" width="88" height="30" rx="15" fill="url(#blueArc)"/>
+              <rect x="348" y="96" width="24" height="40" rx="8" transform="rotate(45 360 116)" fill="#ff4757"/>
+              <circle cx="256" cy="274" r="164" fill="url(#caseGrad)" stroke="#334155" stroke-width="8"/>
+              <circle cx="256" cy="274" r="130" fill="none" stroke="#1e293b" stroke-width="30"/>
+              <path d="M 256 144 A 130 130 0 1 1 138 328" fill="none" stroke="url(#blueArc)" stroke-width="30" stroke-linecap="round"/>
+              <path d="M 256 182 A 92 92 0 1 1 172 312" fill="none" stroke="url(#deenArc)" stroke-width="14" stroke-linecap="round"/>
+              <path d="M 256 196 C 256 196 306 238 296 286 C 289 319 259 334 256 334 C 253 334 223 319 216 286 C 206 238 256 196 256 196 Z" fill="url(#flameGrad)"/>
+              <path d="M 256 242 C 256 242 278 264 273 290 C 269 306 258 315 256 315 C 254 315 243 306 239 290 C 234 264 256 242 256 242 Z" fill="url(#coreGrad)"/>
+              <line x1="256" y1="274" x2="314" y2="216" stroke="#ffffff" stroke-width="16" stroke-linecap="round"/>
+              <circle cx="256" cy="274" r="18" fill="#ffffff"/>
+              <circle cx="256" cy="274" r="8" fill="#ff4757"/>
+              </svg>
+          """
+          svg_path = f"{base}/clean_icon.svg"
+          write_file(svg_path, pro_svg)
+
+          # Render PNG icons for all Android screen densities
+          densities = {
+              "mipmap-mdpi": 48,
+              "mipmap-hdpi": 72,
+              "mipmap-xhdpi": 96,
+              "mipmap-xxhdpi": 144,
+              "mipmap-xxxhdpi": 192,
+          }
+          for folder, size in densities.items():
+              out_main = f"{base}/app/src/main/res/{folder}/ic_launcher.png"
+              out_round = f"{base}/app/src/main/res/{folder}/ic_launcher_round.png"
+              subprocess.run(["rsvg-convert", "-w", str(size), "-h", str(size), svg_path, "-o", out_main], check=True)
+              shutil.copy(out_main, out_round)
 
           # 1. settings.gradle
           write_file(f"{base}/settings.gradle", """
@@ -127,7 +199,7 @@ jobs:
               }
           """)
 
-          # 5. AndroidManifest.xml (All Permissions Allowed + Always Screen On)
+          # 5. AndroidManifest.xml
           write_file(f"{base}/app/src/main/AndroidManifest.xml", """
               <?xml version="1.0" encoding="utf-8"?>
               <manifest xmlns:android="http://schemas.android.com/apk/res/android"
@@ -158,7 +230,7 @@ jobs:
                   <application
                       android:allowBackup="true"
                       android:icon="@mipmap/ic_launcher"
-                      android:roundIcon="@mipmap/ic_launcher"
+                      android:roundIcon="@mipmap/ic_launcher_round"
                       android:label="DeenTimeR"
                       android:supportsRtl="true"
                       android:usesCleartextTraffic="true"
@@ -198,7 +270,7 @@ jobs:
               </FrameLayout>
           """)
 
-          # 7. Pro 3D Launcher Icon XMLs (Background, Foreground, Adaptive & Legacy Fallback)
+          # 7. Full Multi-Gradient Adaptive Icon XMLs (Matches SVG 100%)
           write_file(f"{base}/app/src/main/res/drawable/ic_launcher_background.xml", """
               <?xml version="1.0" encoding="utf-8"?>
               <vector xmlns:android="http://schemas.android.com/apk/res/android"
@@ -228,26 +300,73 @@ jobs:
                   android:viewportWidth="108"
                   android:viewportHeight="108">
                   <path android:fillColor="#475569" android:pathData="M51,21h6v6h-6z" />
-                  <path android:fillColor="#3B82F6" android:pathData="M46,17.5C46,16.12 47.12,15 48.5,15h11C60.88,15 62,16.12 62,17.5v1C62,19.88 60.88,21 59.5,21h-11C47.12,21 46,19.88 46,18.5v-1z" />
+                  <path android:pathData="M46,17.5C46,16.12 47.12,15 48.5,15h11C60.88,15 62,16.12 62,17.5v1C62,19.88 60.88,21 59.5,21h-11C47.12,21 46,19.88 46,18.5v-1z">
+                      <aapt:attr name="android:fillColor">
+                          <gradient android:startX="46" android:startY="15" android:endX="62" android:endY="21" android:type="linear">
+                              <item android:offset="0.0" android:color="#38BDF8" />
+                              <item android:offset="1.0" android:color="#6366F1" />
+                          </gradient>
+                      </aapt:attr>
+                  </path>
                   <path android:fillColor="#FF4757" android:pathData="M71.5,25.5l4.2,-4.2l3.2,3.2l-4.2,4.2z" />
-                  <path android:fillColor="#0F172A" android:strokeWidth="1.5" android:strokeColor="#334155" android:pathData="M54,57m-28,0a28,28 0,1 1,56 0a28,28 0,1 1,-56 0" />
+                  <path android:pathData="M54,57m-28,0a28,28 0,1 1,56 0a28,28 0,1 1,-56 0" android:strokeWidth="1.5" android:strokeColor="#334155">
+                      <aapt:attr name="android:fillColor">
+                          <gradient android:startX="26" android:startY="29" android:endX="82" android:endY="85" android:type="linear">
+                              <item android:offset="0.0" android:color="#1E293B" />
+                              <item android:offset="1.0" android:color="#090D16" />
+                          </gradient>
+                      </aapt:attr>
+                  </path>
                   <path android:fillColor="#00000000" android:strokeWidth="5.2" android:strokeColor="#1E293B" android:pathData="M54,57m-22.5,0a22.5,22.5 0,1 1,45 0a22.5,22.5 0,1 1,-45 0" />
-                  <path android:fillColor="#00000000" android:strokeWidth="5.2" android:strokeColor="#38BDF8" android:strokeLineCap="round" android:pathData="M54,34.5 A22.5,22.5 0 1,1 33.2,65.6" />
-                  <path android:fillColor="#00000000" android:strokeWidth="2.4" android:strokeColor="#34D399" android:strokeLineCap="round" android:pathData="M54,41 A16,16 0 1,1 39.2,63.2" />
-                  <path android:fillColor="#FF4757" android:pathData="M54,43 C54,43 62.5,50.2 60.8,58.5 C59.6,64.2 54.5,66.8 54,66.8 C53.5,66.8 48.4,64.2 47.2,58.5 C45.5,50.2 54,43 54,43 Z" />
-                  <path android:fillColor="#F59E0B" android:pathData="M54,51 C54,51 57.8,54.8 57,59.2 C56.4,62 54.3,63.5 54,63.5 C53.7,63.5 51.6,62 51,59.2 C50.2,54.8 54,51 54,51 Z" />
+                  <path android:fillColor="#00000000" android:strokeWidth="5.2" android:strokeLineCap="round" android:pathData="M54,34.5 A22.5,22.5 0 1,1 33.2,65.6">
+                      <aapt:attr name="android:strokeColor">
+                          <gradient android:startX="54" android:startY="34" android:endX="33" android:endY="78" android:type="linear">
+                              <item android:offset="0.0" android:color="#38BDF8" />
+                              <item android:offset="0.5" android:color="#3B82F6" />
+                              <item android:offset="1.0" android:color="#6366F1" />
+                          </gradient>
+                      </aapt:attr>
+                  </path>
+                  <path android:fillColor="#00000000" android:strokeWidth="2.4" android:strokeLineCap="round" android:pathData="M54,41 A16,16 0 1,1 39.2,63.2">
+                      <aapt:attr name="android:strokeColor">
+                          <gradient android:startX="54" android:startY="41" android:endX="39" android:endY="73" android:type="linear">
+                              <item android:offset="0.0" android:color="#34D399" />
+                              <item android:offset="1.0" android:color="#059669" />
+                          </gradient>
+                      </aapt:attr>
+                  </path>
+                  <path android:pathData="M54,43 C54,43 62.5,50.2 60.8,58.5 C59.6,64.2 54.5,66.8 54,66.8 C53.5,66.8 48.4,64.2 47.2,58.5 C45.5,50.2 54,43 54,43 Z">
+                      <aapt:attr name="android:fillColor">
+                          <gradient android:startX="54" android:startY="43" android:endX="54" android:endY="67" android:type="linear">
+                              <item android:offset="0.0" android:color="#FF7F50" />
+                              <item android:offset="0.5" android:color="#FF4757" />
+                              <item android:offset="1.0" android:color="#E11D48" />
+                          </gradient>
+                      </aapt:attr>
+                  </path>
+                  <path android:pathData="M54,51 C54,51 57.8,54.8 57,59.2 C56.4,62 54.3,63.5 54,63.5 C53.7,63.5 51.6,62 51,59.2 C50.2,54.8 54,51 54,51 Z">
+                      <aapt:attr name="android:fillColor">
+                          <gradient android:startX="54" android:startY="51" android:endX="54" android:endY="63.5" android:type="linear">
+                              <item android:offset="0.0" android:color="#FEF08A" />
+                              <item android:offset="1.0" android:color="#F59E0B" />
+                          </gradient>
+                      </aapt:attr>
+                  </path>
                   <path android:fillColor="#00000000" android:strokeWidth="2.8" android:strokeColor="#FFFFFF" android:strokeLineCap="round" android:pathData="M54,57 L63.5,47.5" />
                   <path android:fillColor="#FFFFFF" android:pathData="M54,57m-3.2,0a3.2,3.2 0,1 1,6.4 0a3.2,3.2 0,1 1,-6.4 0" />
+                  <path android:fillColor="#FF4757" android:pathData="M54,57m-1.4,0a1.4,1.4 0,1 1,2.8 0a1.4,1.4 0,1 1,-2.8 0" />
               </vector>
           """)
 
-          write_file(f"{base}/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml", """
+          adaptive_xml = """
               <?xml version="1.0" encoding="utf-8"?>
               <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
                   <background android:drawable="@drawable/ic_launcher_background"/>
                   <foreground android:drawable="@drawable/ic_launcher_foreground"/>
               </adaptive-icon>
-          """)
+          """
+          write_file(f"{base}/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml", adaptive_xml)
+          write_file(f"{base}/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml", adaptive_xml)
 
           # 8. MainActivity.kt
           write_file(f"{base}/app/src/main/java/com/example/deentimer/MainActivity.kt", """
@@ -379,7 +498,7 @@ jobs:
                   }
               }
           """)
-          print("Android project assembled successfully!")
+          print("Android project and multi-density icons assembled successfully!")
           PYEOF
 
       - name: 5. Set up Gradle 8.5
