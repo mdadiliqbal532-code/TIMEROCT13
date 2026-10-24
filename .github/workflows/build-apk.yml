@@ -19,342 +19,380 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: 3. Set up Android SDK
-        uses: android-actions/setup-android@v3
+      - name: 3. Accept Android SDK Licenses (Built-in SDK)
+        run: |
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
       - name: 4. Assemble Native Android Project & Embed index.html
         run: |
-          mkdir -p android_build/app/src/main/assets
-          mkdir -p android_build/app/src/main/java/com/example/deentimer
-          mkdir -p android_build/app/src/main/res/layout
-          mkdir -p android_build/app/src/main/res/drawable
-          mkdir -p android_build/app/src/main/res/mipmap-anydpi-v26
-          mkdir -p android_build/app/src/main/res/values
+          python3 - << 'PYEOF'
+          import os, shutil, textwrap
 
-          # Copy index.html from repo root (or existing assets folder) into Android assets
-          if [ -f "index.html" ]; then
-            cp index.html android_build/app/src/main/assets/index.html
-          elif [ -f "app/src/main/assets/index.html" ]; then
-            cp app/src/main/assets/index.html android_build/app/src/main/assets/index.html
-          fi
+          base = "android_build"
+          dirs = [
+              f"{base}/app/src/main/assets",
+              f"{base}/app/src/main/java/com/example/deentimer",
+              f"{base}/app/src/main/res/layout",
+              f"{base}/app/src/main/res/drawable",
+              f"{base}/app/src/main/res/mipmap-anydpi-v26",
+              f"{base}/app/src/main/res/values",
+          ]
+          for d in dirs:
+              os.makedirs(d, exist_ok=True)
+
+          # Copy index.html into Android assets
+          if os.path.exists("index.html"):
+              shutil.copy("index.html", f"{base}/app/src/main/assets/index.html")
+          elif os.path.exists("app/src/main/assets/index.html"):
+              shutil.copy("app/src/main/assets/index.html", f"{base}/app/src/main/assets/index.html")
+          else:
+              raise FileNotFoundError("index.html not found in repository root!")
+
+          def write_file(path, content):
+              with open(path, "w", encoding="utf-8") as f:
+                  f.write(textwrap.dedent(content).strip() + "\n")
 
           # 1. settings.gradle
-          cat << 'EOF' > android_build/settings.gradle
-          pluginManagement {
-              repositories {
-                  google()
-                  mavenCentral()
-                  gradlePluginPortal()
-              }
-          }
-          dependencyResolutionManagement {
-              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-              repositories {
-                  google()
-                  mavenCentral()
-              }
-          }
-          rootProject.name = "DeenTimeR"
-          include ':app'
-          EOF
-
-          # 2. gradle.properties
-          cat << 'EOF' > android_build/gradle.properties
-          org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
-          android.useAndroidX=true
-          kotlin.code.style=official
-          EOF
-
-          # 3. Root build.gradle
-          cat << 'EOF' > android_build/build.gradle
-          plugins {
-              id 'com.android.application' version '8.2.2' apply false
-              id 'org.jetbrains.kotlin.android' version '1.9.22' apply false
-          }
-          EOF
-
-          # 4. App build.gradle
-          cat << 'EOF' > android_build/app/build.gradle
-          plugins {
-              id 'com.android.application'
-              id 'org.jetbrains.kotlin.android'
-          }
-
-          android {
-              namespace 'com.example.deentimer'
-              compileSdk 34
-
-              defaultConfig {
-                  applicationId "com.example.deentimer"
-                  minSdk 24
-                  targetSdk 34
-                  versionCode 1
-                  versionName "1.0"
-              }
-
-              buildTypes {
-                  release {
-                      minifyEnabled false
+          write_file(f"{base}/settings.gradle", """
+              pluginManagement {
+                  repositories {
+                      google()
+                      mavenCentral()
+                      gradlePluginPortal()
                   }
               }
-              compileOptions {
-                  sourceCompatibility JavaVersion.VERSION_17
-                  targetCompatibility JavaVersion.VERSION_17
+              dependencyResolutionManagement {
+                  repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+                  repositories {
+                      google()
+                      mavenCentral()
+                  }
               }
-              kotlinOptions {
-                  jvmTarget = '17'
+              rootProject.name = "DeenTimeR"
+              include ':app'
+          """)
+
+          # 2. gradle.properties
+          write_file(f"{base}/gradle.properties", """
+              org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+              android.useAndroidX=true
+              kotlin.code.style=official
+          """)
+
+          # 3. Root build.gradle
+          write_file(f"{base}/build.gradle", """
+              plugins {
+                  id 'com.android.application' version '8.2.2' apply false
+                  id 'org.jetbrains.kotlin.android' version '1.9.22' apply false
               }
-          }
+          """)
 
-          dependencies {
-              implementation 'androidx.core:core-ktx:1.12.0'
-              implementation 'androidx.appcompat:appcompat:1.6.1'
-              implementation 'androidx.activity:activity-ktx:1.8.2'
-          }
-          EOF
+          # 4. App build.gradle
+          write_file(f"{base}/app/build.gradle", """
+              plugins {
+                  id 'com.android.application'
+                  id 'org.jetbrains.kotlin.android'
+              }
 
-          # 5. AndroidManifest.xml (All Permissions Allowed + Always Screen On Support)
-          cat << 'EOF' > android_build/app/src/main/AndroidManifest.xml
-          <?xml version="1.0" encoding="utf-8"?>
-          <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools">
+              android {
+                  namespace 'com.example.deentimer'
+                  compileSdk 34
 
-              <uses-permission android:name="android.permission.INTERNET" />
-              <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-              <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-              <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-              <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-              <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-              <uses-permission android:name="android.permission.CAMERA" />
-              <uses-permission android:name="android.permission.RECORD_AUDIO" />
-              <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-              <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
-              <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
-              <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-              <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
-              <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
-              <uses-permission android:name="android.permission.WAKE_LOCK" />
-              <uses-permission android:name="android.permission.VIBRATE" />
-              <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+                  defaultConfig {
+                      applicationId "com.example.deentimer"
+                      minSdk 24
+                      targetSdk 34
+                      versionCode 1
+                      versionName "1.0"
+                  }
 
-              <uses-feature android:name="android.hardware.camera" android:required="false" />
-              <uses-feature android:name="android.hardware.location.gps" android:required="false" />
-              <uses-feature android:name="android.hardware.microphone" android:required="false" />
+                  buildTypes {
+                      release {
+                          minifyEnabled false
+                      }
+                  }
+                  compileOptions {
+                      sourceCompatibility JavaVersion.VERSION_17
+                      targetCompatibility JavaVersion.VERSION_17
+                  }
+                  kotlinOptions {
+                      jvmTarget = '17'
+                  }
+              }
 
-              <application
-                  android:allowBackup="true"
-                  android:icon="@mipmap/ic_launcher"
-                  android:roundIcon="@mipmap/ic_launcher"
-                  android:label="DeenTimeR"
-                  android:supportsRtl="true"
-                  android:usesCleartextTraffic="true"
-                  android:hardwareAccelerated="true"
-                  android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
+              dependencies {
+                  implementation 'androidx.core:core-ktx:1.12.0'
+                  implementation 'androidx.appcompat:appcompat:1.6.1'
+                  implementation 'androidx.activity:activity-ktx:1.8.2'
+              }
+          """)
 
-                  <activity
-                      android:name=".MainActivity"
-                      android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
-                      android:exported="true"
-                      android:keepScreenOn="true"
-                      android:launchMode="singleTask">
-                      <intent-filter>
-                          <action android:name="android.intent.action.MAIN" />
-                          <category android:name="android.intent.category.LAUNCHER" />
-                      </intent-filter>
-                  </activity>
-              </application>
-          </manifest>
-          EOF
+          # 5. AndroidManifest.xml (All Permissions Allowed + Always Screen On)
+          write_file(f"{base}/app/src/main/AndroidManifest.xml", """
+              <?xml version="1.0" encoding="utf-8"?>
+              <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                  xmlns:tools="http://schemas.android.com/tools">
+
+                  <uses-permission android:name="android.permission.INTERNET" />
+                  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+                  <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+                  <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+                  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+                  <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+                  <uses-permission android:name="android.permission.CAMERA" />
+                  <uses-permission android:name="android.permission.RECORD_AUDIO" />
+                  <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+                  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+                  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+                  <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+                  <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+                  <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+                  <uses-permission android:name="android.permission.WAKE_LOCK" />
+                  <uses-permission android:name="android.permission.VIBRATE" />
+                  <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+                  <uses-feature android:name="android.hardware.camera" android:required="false" />
+                  <uses-feature android:name="android.hardware.location.gps" android:required="false" />
+                  <uses-feature android:name="android.hardware.microphone" android:required="false" />
+
+                  <application
+                      android:allowBackup="true"
+                      android:icon="@mipmap/ic_launcher"
+                      android:roundIcon="@mipmap/ic_launcher"
+                      android:label="DeenTimeR"
+                      android:supportsRtl="true"
+                      android:usesCleartextTraffic="true"
+                      android:hardwareAccelerated="true"
+                      android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
+
+                      <activity
+                          android:name=".MainActivity"
+                          android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
+                          android:exported="true"
+                          android:keepScreenOn="true"
+                          android:launchMode="singleTask">
+                          <intent-filter>
+                              <action android:name="android.intent.action.MAIN" />
+                              <category android:name="android.intent.category.LAUNCHER" />
+                          </intent-filter>
+                      </activity>
+                  </application>
+              </manifest>
+          """)
 
           # 6. activity_main.xml
-          cat << 'EOF' > android_build/app/src/main/res/layout/activity_main.xml
-          <?xml version="1.0" encoding="utf-8"?>
-          <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/main"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:background="#020617"
-              android:keepScreenOn="true">
-              <WebView
-                  android:id="@+id/webview"
+          write_file(f"{base}/app/src/main/res/layout/activity_main.xml", """
+              <?xml version="1.0" encoding="utf-8"?>
+              <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                  android:id="@+id/main"
                   android:layout_width="match_parent"
                   android:layout_height="match_parent"
                   android:background="#020617"
-                  android:keepScreenOn="true" />
-          </FrameLayout>
-          EOF
+                  android:keepScreenOn="true">
+                  <WebView
+                      android:id="@+id/webview"
+                      android:layout_width="match_parent"
+                      android:layout_height="match_parent"
+                      android:background="#020617"
+                      android:keepScreenOn="true" />
+              </FrameLayout>
+          """)
 
-          # 7. Adaptive Pro Launcher Icon XMLs
-          cat << 'EOF' > android_build/app/src/main/res/drawable/ic_launcher_background.xml
-          <?xml version="1.0" encoding="utf-8"?>
-          <vector xmlns:android="http://schemas.android.com/apk/res/android"
-              android:width="108dp" android:height="108dp"
-              android:viewportWidth="108" android:viewportHeight="108">
-              <path android:fillColor="#020617" android:pathData="M0,0h108v108h-108z"/>
-          </vector>
-          EOF
+          # 7. Pro 3D Launcher Icon XMLs (Background, Foreground, Adaptive & Legacy Fallback)
+          write_file(f"{base}/app/src/main/res/drawable/ic_launcher_background.xml", """
+              <?xml version="1.0" encoding="utf-8"?>
+              <vector xmlns:android="http://schemas.android.com/apk/res/android"
+                  xmlns:aapt="http://schemas.android.com/aapt"
+                  android:width="108dp"
+                  android:height="108dp"
+                  android:viewportWidth="108"
+                  android:viewportHeight="108">
+                  <path android:pathData="M0,0h108v108h-108z">
+                      <aapt:attr name="android:fillColor">
+                          <gradient android:startX="0" android:startY="0" android:endX="108" android:endY="108" android:type="linear">
+                              <item android:offset="0.0" android:color="#0F172A" />
+                              <item android:offset="0.5" android:color="#020617" />
+                              <item android:offset="1.0" android:color="#01030A" />
+                          </gradient>
+                      </aapt:attr>
+                  </path>
+              </vector>
+          """)
 
-          cat << 'EOF' > android_build/app/src/main/res/drawable/ic_launcher_foreground.xml
-          <?xml version="1.0" encoding="utf-8"?>
-          <vector xmlns:android="http://schemas.android.com/apk/res/android"
-              android:width="108dp" android:height="108dp"
-              android:viewportWidth="108" android:viewportHeight="108">
-              <path android:fillColor="#1E293B" android:pathData="M54,56m-28,0a28,28 0,1 1,56 0a28,28 0,1 1,-56 0"/>
-              <path android:fillColor="#00000000" android:strokeColor="#3B82F6" android:strokeWidth="5.5" android:strokeLineCap="round" android:pathData="M54,32 A24,24 0 1,1 32,66"/>
-              <path android:fillColor="#00000000" android:strokeColor="#10B981" android:strokeWidth="3" android:strokeLineCap="round" android:pathData="M54,39 A17,17 0 1,1 39,63"/>
-              <path android:fillColor="#FF4757" android:pathData="M54,43 C54,43 62,50 60,58 C59,63 54,66 54,66 C54,66 49,63 48,58 C46,50 54,43 54,43 Z"/>
-              <path android:fillColor="#FFFFFF" android:pathData="M54,56m-3,0a3,3 0,1 1,6 0a3,3 0,1 1,-6 0"/>
-          </vector>
-          EOF
+          write_file(f"{base}/app/src/main/res/drawable/ic_launcher_foreground.xml", """
+              <?xml version="1.0" encoding="utf-8"?>
+              <vector xmlns:android="http://schemas.android.com/apk/res/android"
+                  xmlns:aapt="http://schemas.android.com/aapt"
+                  android:width="108dp"
+                  android:height="108dp"
+                  android:viewportWidth="108"
+                  android:viewportHeight="108">
+                  <path android:fillColor="#475569" android:pathData="M51,21h6v6h-6z" />
+                  <path android:fillColor="#3B82F6" android:pathData="M46,17.5C46,16.12 47.12,15 48.5,15h11C60.88,15 62,16.12 62,17.5v1C62,19.88 60.88,21 59.5,21h-11C47.12,21 46,19.88 46,18.5v-1z" />
+                  <path android:fillColor="#FF4757" android:pathData="M71.5,25.5l4.2,-4.2l3.2,3.2l-4.2,4.2z" />
+                  <path android:fillColor="#0F172A" android:strokeWidth="1.5" android:strokeColor="#334155" android:pathData="M54,57m-28,0a28,28 0,1 1,56 0a28,28 0,1 1,-56 0" />
+                  <path android:fillColor="#00000000" android:strokeWidth="5.2" android:strokeColor="#1E293B" android:pathData="M54,57m-22.5,0a22.5,22.5 0,1 1,45 0a22.5,22.5 0,1 1,-45 0" />
+                  <path android:fillColor="#00000000" android:strokeWidth="5.2" android:strokeColor="#38BDF8" android:strokeLineCap="round" android:pathData="M54,34.5 A22.5,22.5 0 1,1 33.2,65.6" />
+                  <path android:fillColor="#00000000" android:strokeWidth="2.4" android:strokeColor="#34D399" android:strokeLineCap="round" android:pathData="M54,41 A16,16 0 1,1 39.2,63.2" />
+                  <path android:fillColor="#FF4757" android:pathData="M54,43 C54,43 62.5,50.2 60.8,58.5 C59.6,64.2 54.5,66.8 54,66.8 C53.5,66.8 48.4,64.2 47.2,58.5 C45.5,50.2 54,43 54,43 Z" />
+                  <path android:fillColor="#F59E0B" android:pathData="M54,51 C54,51 57.8,54.8 57,59.2 C56.4,62 54.3,63.5 54,63.5 C53.7,63.5 51.6,62 51,59.2 C50.2,54.8 54,51 54,51 Z" />
+                  <path android:fillColor="#00000000" android:strokeWidth="2.8" android:strokeColor="#FFFFFF" android:strokeLineCap="round" android:pathData="M54,57 L63.5,47.5" />
+                  <path android:fillColor="#FFFFFF" android:pathData="M54,57m-3.2,0a3.2,3.2 0,1 1,6.4 0a3.2,3.2 0,1 1,-6.4 0" />
+              </vector>
+          """)
 
-          cat << 'EOF' > android_build/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
-          <?xml version="1.0" encoding="utf-8"?>
-          <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-              <background android:drawable="@drawable/ic_launcher_background"/>
-              <foreground android:drawable="@drawable/ic_launcher_foreground"/>
-          </adaptive-icon>
-          EOF
+          write_file(f"{base}/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml", """
+              <?xml version="1.0" encoding="utf-8"?>
+              <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+                  <background android:drawable="@drawable/ic_launcher_background"/>
+                  <foreground android:drawable="@drawable/ic_launcher_foreground"/>
+              </adaptive-icon>
+          """)
 
-          # 8. MainActivity.kt (Crash-proof, Redmi/MIUI Safe, Firebase HTTPS BaseURL)
-          cat << 'EOF' > android_build/app/src/main/java/com/example/deentimer/MainActivity.kt
-          package com.example.deentimer
+          # 8. MainActivity.kt
+          write_file(f"{base}/app/src/main/java/com/example/deentimer/MainActivity.kt", """
+              package com.example.deentimer
 
-          import android.Manifest
-          import android.annotation.SuppressLint
-          import android.content.pm.PackageManager
-          import android.graphics.Color
-          import android.os.Build
-          import android.os.Bundle
-          import android.view.WindowManager
-          import android.webkit.CookieManager
-          import android.webkit.GeolocationPermissions
-          import android.webkit.JavascriptInterface
-          import android.webkit.PermissionRequest
-          import android.webkit.WebChromeClient
-          import android.webkit.WebSettings
-          import android.webkit.WebView
-          import android.webkit.WebViewClient
-          import androidx.activity.OnBackPressedCallback
-          import androidx.appcompat.app.AppCompatActivity
-          import androidx.core.app.ActivityCompat
-          import androidx.core.content.ContextCompat
-          import androidx.core.view.WindowCompat
+              import android.Manifest
+              import android.annotation.SuppressLint
+              import android.content.pm.PackageManager
+              import android.graphics.Color
+              import android.os.Build
+              import android.os.Bundle
+              import android.view.WindowManager
+              import android.webkit.CookieManager
+              import android.webkit.GeolocationPermissions
+              import android.webkit.JavascriptInterface
+              import android.webkit.PermissionRequest
+              import android.webkit.WebChromeClient
+              import android.webkit.WebSettings
+              import android.webkit.WebView
+              import android.webkit.WebViewClient
+              import androidx.activity.OnBackPressedCallback
+              import androidx.appcompat.app.AppCompatActivity
+              import androidx.core.app.ActivityCompat
+              import androidx.core.content.ContextCompat
+              import androidx.core.view.WindowCompat
 
-          class MainActivity : AppCompatActivity() {
-              private lateinit var webView: WebView
+              class MainActivity : AppCompatActivity() {
+                  private lateinit var webView: WebView
 
-              @SuppressLint("SetJavaScriptEnabled")
-              override fun onCreate(savedInstanceState: Bundle?) {
-                  super.onCreate(savedInstanceState)
-                  window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-                  window.statusBarColor = Color.parseColor("#020617")
-                  window.navigationBarColor = Color.parseColor("#020617")
+                  @SuppressLint("SetJavaScriptEnabled")
+                  override fun onCreate(savedInstanceState: Bundle?) {
+                      super.onCreate(savedInstanceState)
+                      window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                      window.statusBarColor = Color.parseColor("#020617")
+                      window.navigationBarColor = Color.parseColor("#020617")
 
-                  WindowCompat.getInsetsController(window, window.decorView).apply {
-                      isAppearanceLightStatusBars = false
-                      isAppearanceLightNavigationBars = false
-                  }
-
-                  setContentView(R.layout.activity_main)
-                  webView = findViewById(R.id.webview)
-                  webView.keepScreenOn = true
-
-                  requestAllPermissions()
-
-                  CookieManager.getInstance().setAcceptCookie(true)
-                  CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true)
-
-                  webView.settings.apply {
-                      javaScriptEnabled = true
-                      domStorageEnabled = true
-                      databaseEnabled = true
-                      setGeolocationEnabled(true)
-                      allowFileAccess = true
-                      allowContentAccess = true
-                      allowFileAccessFromFileURLs = true
-                      allowUniversalAccessFromFileURLs = true
-                      javaScriptCanOpenWindowsAutomatically = true
-                      mediaPlaybackRequiresUserGesture = false
-                      mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-                      cacheMode = WebSettings.LOAD_DEFAULT
-                  }
-
-                  webView.webViewClient = WebViewClient()
-                  webView.webChromeClient = object : WebChromeClient() {
-                      override fun onGeolocationPermissionsShowPrompt(origin: String?, callback: GeolocationPermissions.Callback?) {
-                          callback?.invoke(origin, true, false)
+                      WindowCompat.getInsetsController(window, window.decorView).apply {
+                          isAppearanceLightStatusBars = false
+                          isAppearanceLightNavigationBars = false
                       }
-                      override fun onPermissionRequest(request: PermissionRequest?) {
-                          request?.let { runOnUiThread { it.grant(it.resources) } }
-                      }
-                  }
 
-                  webView.addJavascriptInterface(object {
-                      @JavascriptInterface
-                      fun setKeepScreenOn(enable: Boolean) {
-                          runOnUiThread {
-                              if (enable) {
-                                  window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-                                  webView.keepScreenOn = true
-                              } else {
-                                  window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-                                  webView.keepScreenOn = false
-                              }
+                      setContentView(R.layout.activity_main)
+                      webView = findViewById(R.id.webview)
+                      webView.keepScreenOn = true
+
+                      requestAllPermissions()
+
+                      CookieManager.getInstance().setAcceptCookie(true)
+                      CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true)
+
+                      webView.settings.apply {
+                          javaScriptEnabled = true
+                          domStorageEnabled = true
+                          databaseEnabled = true
+                          setGeolocationEnabled(true)
+                          allowFileAccess = true
+                          allowContentAccess = true
+                          allowFileAccessFromFileURLs = true
+                          allowUniversalAccessFromFileURLs = true
+                          javaScriptCanOpenWindowsAutomatically = true
+                          mediaPlaybackRequiresUserGesture = false
+                          mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+                          cacheMode = WebSettings.LOAD_DEFAULT
+                      }
+
+                      webView.webViewClient = WebViewClient()
+                      webView.webChromeClient = object : WebChromeClient() {
+                          override fun onGeolocationPermissionsShowPrompt(origin: String?, callback: GeolocationPermissions.Callback?) {
+                              callback?.invoke(origin, true, false)
+                          }
+                          override fun onPermissionRequest(request: PermissionRequest?) {
+                              request?.let { runOnUiThread { it.grant(it.resources) } }
                           }
                       }
-                  }, "AndroidBridge")
 
-                  val htmlContent = assets.open("index.html").bufferedReader().use { it.readText() }
-                  webView.loadDataWithBaseURL(
-                      "https://neettimercloud.firebaseapp.com/",
-                      htmlContent,
-                      "text/html",
-                      "UTF-8",
-                      null
-                  )
-
-                  onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-                      override fun handleOnBackPressed() {
-                          webView.evaluateJavascript("window.handleAndroidBack && window.handleAndroidBack()") { result ->
-                              if (result != "true") {
-                                  moveTaskToBack(true)
+                      webView.addJavascriptInterface(object {
+                          @JavascriptInterface
+                          fun setKeepScreenOn(enable: Boolean) {
+                              runOnUiThread {
+                                  if (enable) {
+                                      window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                                      webView.keepScreenOn = true
+                                  } else {
+                                      window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                                      webView.keepScreenOn = false
+                                  }
                               }
                           }
-                      }
-                  })
-              }
+                      }, "AndroidBridge")
 
-              private fun requestAllPermissions() {
-                  try {
-                      val perms = mutableListOf(
-                          Manifest.permission.ACCESS_FINE_LOCATION,
-                          Manifest.permission.ACCESS_COARSE_LOCATION,
-                          Manifest.permission.CAMERA,
-                          Manifest.permission.RECORD_AUDIO
+                      val htmlContent = assets.open("index.html").bufferedReader().use { it.readText() }
+                      webView.loadDataWithBaseURL(
+                          "https://neettimercloud.firebaseapp.com/",
+                          htmlContent,
+                          "text/html",
+                          "UTF-8",
+                          null
                       )
-                      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                          perms.add(Manifest.permission.POST_NOTIFICATIONS)
-                      }
-                      val missing = perms.filter {
-                          ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
-                      }
-                      if (missing.isNotEmpty()) {
-                          ActivityCompat.requestPermissions(this, missing.toTypedArray(), 1001)
-                      }
-                  } catch (e: Exception) {}
-              }
-          }
-          EOF
 
-      - name: 5. Build Debug APK with Gradle
+                      onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+                          override fun handleOnBackPressed() {
+                              webView.evaluateJavascript("window.handleAndroidBack && window.handleAndroidBack()") { result ->
+                                  if (result != "true") {
+                                      moveTaskToBack(true)
+                                  }
+                              }
+                          }
+                      })
+                  }
+
+                  private fun requestAllPermissions() {
+                      try {
+                          val perms = mutableListOf(
+                              Manifest.permission.ACCESS_FINE_LOCATION,
+                              Manifest.permission.ACCESS_COARSE_LOCATION,
+                              Manifest.permission.CAMERA,
+                              Manifest.permission.RECORD_AUDIO
+                          )
+                          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                              perms.add(Manifest.permission.POST_NOTIFICATIONS)
+                          }
+                          val missing = perms.filter {
+                              ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+                          }
+                          if (missing.isNotEmpty()) {
+                              ActivityCompat.requestPermissions(this, missing.toTypedArray(), 1001)
+                          }
+                      } catch (e: Exception) {}
+                  }
+              }
+          """)
+          print("Android project assembled successfully!")
+          PYEOF
+
+      - name: 5. Set up Gradle 8.5
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: '8.5'
-      - run: |
+
+      - name: 6. Build Debug APK with Gradle
+        run: |
           cd android_build
           gradle assembleDebug --no-daemon
 
-      - name: 6. Upload Ready-to-Install DeenTimeR APK
+      - name: 7. Upload Ready-to-Install DeenTimeR APK
         uses: actions/upload-artifact@v4
         with:
           name: DeenTimeR-APK
